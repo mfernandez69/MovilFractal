@@ -1,4 +1,4 @@
-package com.example.aplicacionfractal.models
+package com.example.aplicacionfractal.data.models
 import java.time.LocalDateTime
 
 data class Factura(

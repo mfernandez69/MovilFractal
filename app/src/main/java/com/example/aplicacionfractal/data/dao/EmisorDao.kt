@@ -1,6 +1,6 @@
 package com.example.aplicacionfractal.data.dao
 
-import com.example.aplicacionfractal.models.Emisor
+import com.example.aplicacionfractal.data.models.Emisor
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 

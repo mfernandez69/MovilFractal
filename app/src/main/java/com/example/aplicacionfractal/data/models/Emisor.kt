@@ -1,4 +1,4 @@
-package com.example.aplicacionfractal.models
+package com.example.aplicacionfractal.data.models
 
 data class Emisor(
     val direccion: List<String>,

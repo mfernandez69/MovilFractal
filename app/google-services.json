@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "718383008770",
+    "project_id": "aplicacionfractal",
+    "storage_bucket": "aplicacionfractal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:718383008770:android:bdc0d3687a8a338af82b1b",
+        "android_client_info": {
+          "package_name": "com.example.aplicacionfractal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZBfiOkMMKTUuk6XjvNUNvq36a9LrlzDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

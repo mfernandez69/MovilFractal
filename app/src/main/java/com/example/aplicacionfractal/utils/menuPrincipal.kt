@@ -82,7 +82,9 @@ fun MenuPrincipal(
                     }
                 }
                 FloatingActionButton(
-                    onClick = { /* Acción del botón central */ },
+                    onClick = {
+                        navController.navigate("pantallaAddFactura")
+                    },
                     containerColor = ColorSecundario,
                     contentColor = Color.White,
                     modifier = Modifier.offset(y = (-25).dp)

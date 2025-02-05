@@ -1,8 +1,13 @@
 package com.example.aplicacionfractal.utils
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.BottomAppBar
@@ -20,6 +25,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.aplicacionfractal.ui.theme.ColorPrimario
 import com.example.aplicacionfractal.ui.theme.ColorSecundario
 
@@ -39,43 +47,49 @@ fun MenuPrincipal(
 
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                containerColor = ColorPrimario,
-                contentColor = Color.White,
-                actions = {
-                    items.forEachIndexed { index, item ->
-                        if (index == items.size / 2) {
-                            Spacer(Modifier.weight(1f))
-                        }
-                        NavigationBarItem(
-                            icon = { Icon(item.icon, contentDescription = item.title) },
-                            label = { Text(item.title) },
-                            selected = selectedItemIndex == index,
-                            onClick = {
-                                selectedItemIndex = index
-                                when (index) {
-                                    0 -> navController.navigate("pantallaPrincipal")
-                                    1 -> navController.navigate("pantallaPago")
-                                    2 -> navController.navigate("pantallaAgenda")
-                                    3 -> navController.navigate("pantallaAlumnos")
-                                }
-                            }
-                        )
-                        if (index == items.size / 2 - 1) {
-                            Spacer(Modifier.weight(1f))
-                        }
-                    }
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = { /* Acción del botón central */ },
-                        containerColor = ColorSecundario,
-                        contentColor = Color.White
+            Box(
+                contentAlignment = Alignment.TopCenter
+            ) {
+                BottomAppBar(
+                    containerColor = ColorPrimario,
+                    contentColor = Color.White,
+                    tonalElevation = 10.dp
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Añadir")
+                        items.forEachIndexed { index, item ->
+                            if (index == items.size / 2) {
+                                Spacer(modifier = Modifier.width(56.dp)) // Espacio para el FAB
+                            }
+                            NavigationBarItem(
+                                icon = { Icon(item.icon, contentDescription = item.title) },
+                                label = { Text(item.title, fontSize = 12.sp) },
+                                selected = selectedItemIndex == index,
+                                onClick = {
+                                    selectedItemIndex = index
+                                    when (index) {
+                                        0 -> navController.navigate("pantallaPrincipal")
+                                        1 -> navController.navigate("pantallaPago")
+                                        2 -> navController.navigate("pantallaAgenda")
+                                        3 -> navController.navigate("pantallaAlumnos")
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
-            )
+                FloatingActionButton(
+                    onClick = { /* Acción del botón central */ },
+                    containerColor = ColorSecundario,
+                    contentColor = Color.White,
+                    modifier = Modifier.offset(y = (-25).dp)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Añadir")
+                }
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -84,8 +98,9 @@ fun MenuPrincipal(
     }
 }
 
-
 data class NavigationItem(
     val title: String,
     val icon: ImageVector
 )
+
+

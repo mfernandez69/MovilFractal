@@ -16,6 +16,9 @@ data class Factura(
     @get:PropertyName("emisorId") @set:PropertyName("emisorId")
     var emisorId: DocumentReference? = null,
 
+    @get:PropertyName("receptorId") @set:PropertyName("receptorId")
+    var receptorId: DocumentReference? = null,
+
     @get:PropertyName("fechaEmision") @set:PropertyName("fechaEmision")
     var fechaEmision: Timestamp? = null,
 

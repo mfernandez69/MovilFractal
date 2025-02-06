@@ -3,8 +3,12 @@ package com.example.aplicacionfractal.viewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.aplicacionfractal.data.dao.EmisorDao
 import com.example.aplicacionfractal.data.dao.FacturaDao
+import com.example.aplicacionfractal.data.dao.ReceptorDao
+import com.example.aplicacionfractal.data.models.Emisor
 import com.example.aplicacionfractal.data.models.Factura
+import com.example.aplicacionfractal.data.models.Receptor
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +16,8 @@ import kotlinx.coroutines.launch
 
 class FacturaViewModel : ViewModel() {
     private val facturaDao = FacturaDao(FirebaseFirestore.getInstance())
+    private val emisorDao = EmisorDao(FirebaseFirestore.getInstance())
+    private val receptorDao = ReceptorDao(FirebaseFirestore.getInstance())
     private val _facturas = MutableStateFlow<List<Factura>>(emptyList())
     val facturas: StateFlow<List<Factura>> = _facturas
 
@@ -31,6 +37,20 @@ class FacturaViewModel : ViewModel() {
             } catch (e: Exception) {
                 _error.value = "Error cargando facturas: ${e.localizedMessage}"
                 Log.e("FacturaVM", "Error al cargar facturas", e)
+            }
+        }
+    }
+
+    fun agregarFactura(factura: Factura, emisor: Emisor, receptor: Receptor) = viewModelScope.launch {
+        factura.emisorId = emisorDao.obtenerEmisorId(emisor.nif)
+        factura.receptorId = receptorDao.obtenerReceptorId(receptor.cif)
+        viewModelScope.launch {
+            try {
+                facturaDao.agregarFactura(factura)
+                _error.value = null
+            } catch (e: Exception) {
+                _error.value = "Error agregando factura: ${e.localizedMessage}"
+                Log.e("FacturaVM", "Error al agregar factura", e)
             }
         }
     }

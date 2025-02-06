@@ -129,7 +129,7 @@ fun ContentAddView(
                     numFactura = it
                 }
             },
-            label = { Text(text = "Número de Factura", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "Número de Factura") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -144,7 +144,7 @@ fun ContentAddView(
                     baseImponible = it
                 }
             },
-            label = { Text(text = "Base imponible", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "Base imponible") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -165,7 +165,7 @@ fun ContentAddView(
         OutlinedTextField(
             value = nifEmisor,
             onValueChange = { nifEmisor = it },
-            label = { Text(text = "NIF del emisor", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "NIF del emisor") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -175,7 +175,7 @@ fun ContentAddView(
         OutlinedTextField(
             value = empresaEmisor,
             onValueChange = { empresaEmisor = it },
-            label = { Text(text = "Empresa emisora", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "Empresa emisora") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -185,7 +185,7 @@ fun ContentAddView(
         OutlinedTextField(
             value = direccionEmisor,
             onValueChange = { direccionEmisor = it },
-            label = { Text(text = "Dirección del emisor", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "Dirección del emisor") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -205,7 +205,7 @@ fun ContentAddView(
         OutlinedTextField(
             value = clienteReceptor,
             onValueChange = { clienteReceptor = it },
-            label = { Text(text = "Cliente receptor", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "Cliente receptor") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -215,7 +215,7 @@ fun ContentAddView(
         OutlinedTextField(
             value = cifReceptor,
             onValueChange = { cifReceptor = it },
-            label = { Text(text = "CIF del receptor", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "CIF del receptor") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -225,7 +225,7 @@ fun ContentAddView(
         OutlinedTextField(
             value = direccionReceptor,
             onValueChange = { direccionReceptor = it },
-            label = { Text(text = "Dirección del receptor", fontSize = 14.sp, fontWeight = FontWeight.W500) },
+            label = { Text(text = "Dirección del receptor") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)

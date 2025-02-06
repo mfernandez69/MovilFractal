@@ -35,7 +35,7 @@ import com.example.aplicacionfractal.ui.theme.ColorSecundario
 @Composable
 fun MenuPrincipal(
     navController: NavHostController,
-    content: @Composable () -> Unit
+    content: @Composable (Any?) -> Unit
 ) {
     val items = listOf(
         NavigationItem("Facturas", Icons.Filled.Home),
@@ -95,7 +95,7 @@ fun MenuPrincipal(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            content()
+            content(innerPadding)
         }
     }
 }

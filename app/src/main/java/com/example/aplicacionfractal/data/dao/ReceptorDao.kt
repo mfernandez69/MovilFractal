@@ -1,6 +1,7 @@
 package com.example.aplicacionfractal.data.dao
 
 import com.example.aplicacionfractal.data.models.Receptor
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -19,7 +20,8 @@ class ReceptorDao(private val db: FirebaseFirestore) {
     }
 
     suspend fun agregarReceptor(receptor: Receptor) {
-        receptoresRef.add(receptor).await()
+        //receptoresRef.add(receptor).await()
+        receptoresRef.document(receptor.cif).set(receptor).await()
     }
 
     suspend fun actualizarReceptor(id: String, receptor: Receptor) {
@@ -28,5 +30,9 @@ class ReceptorDao(private val db: FirebaseFirestore) {
 
     suspend fun borrarReceptor(id: String) {
         receptoresRef.document(id).delete().await()
+    }
+
+    fun obtenerReceptorId(id: String): DocumentReference? {
+        return receptoresRef.document(id)
     }
 }

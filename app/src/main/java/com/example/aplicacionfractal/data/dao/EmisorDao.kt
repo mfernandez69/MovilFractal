@@ -1,6 +1,7 @@
 package com.example.aplicacionfractal.data.dao
 
 import com.example.aplicacionfractal.data.models.Emisor
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -19,7 +20,8 @@ class EmisorDao(private val db: FirebaseFirestore) {
     }
 
     suspend fun agregarEmisor(emisor: Emisor) {
-        emisoresRef.add(emisor).await()
+        //emisoresRef.add(emisor).await()
+        emisoresRef.document(emisor.nif).set(emisor).await()
     }
 
     suspend fun actualizarEmisor(id: String, emisor: Emisor) {
@@ -28,5 +30,9 @@ class EmisorDao(private val db: FirebaseFirestore) {
 
     suspend fun borrarEmisor(id: String) {
         emisoresRef.document(id).delete().await()
+    }
+
+    fun obtenerEmisorId(id: String): DocumentReference? {
+        return emisoresRef.document(id)
     }
 }

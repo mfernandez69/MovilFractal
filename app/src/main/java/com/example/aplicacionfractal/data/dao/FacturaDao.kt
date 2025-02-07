@@ -53,5 +53,33 @@ class FacturaDao(private val db: FirebaseFirestore) {
             Log.e("Firestore", "Error al eliminar factura con nFactura $nFactura: ${e.message}")
         }
     }
+    //calcular ganancias y pérdidas
+    suspend fun calcularGananciasYPerdidas(): Pair<Double, Double> {
+        try {
+            // Obtener todas las facturas
+            val querySnapshot = facturasRef.get().await()
+            val facturas = querySnapshot.documents.mapNotNull { it.toObject(Factura::class.java) }
+
+            // Inicializar variables para ganancias y pérdidas
+            var ganancias = 0.0
+            var perdidas = 0.0
+
+            // Iterar sobre las facturas y clasificar según si son emitidas o recibidas
+            for (factura in facturas) {
+                if (factura.emitida) {
+                    ganancias += factura.baseImponible // Ganancia por facturas emitidas
+                } else {
+                    perdidas += factura.baseImponible // Pérdida por facturas recibidas
+                }
+            }
+
+            Log.d("GananciasYPerdidas", "Ganancias: $ganancias, Pérdidas: $perdidas")
+            return Pair(ganancias, perdidas)
+
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error al calcular ganancias y pérdidas: ${e.message}")
+            return Pair(0.0, 0.0)
+        }
+    }
 
 }

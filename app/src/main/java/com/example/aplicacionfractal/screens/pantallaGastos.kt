@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.example.aplicacionfractal.utils.MenuPrincipal
 import com.example.aplicacionfractal.utils.TabMultiple
+import com.example.aplicacionfractal.viewModels.GastosViewModel
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -82,21 +86,40 @@ fun Graficos(){
     }
 }
 @Composable
-fun GraficoGananciasPerdidas() {
+fun GraficoGananciasPerdidas(viewModel: GastosViewModel = GastosViewModel()) {
+    // Observar las ganancias y pérdidas desde el ViewModel
+    val gananciasPerdidas by viewModel.gananciasPerdidas.collectAsState()
+
+    // Extraer valores de ganancias y pérdidas
+    val (ganancias, perdidas) = gananciasPerdidas
+
+    // Mostrar un indicador de carga si los datos aún no están listos
+    if (ganancias == 0.0 && perdidas == 0.0) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    // Crear las entradas del gráfico basadas en los valores observados
     val entries = listOf(
-        BarEntry(0f, 300f), // Ganancias (ajustamos a 0f para que las etiquetas coincidan)
-        BarEntry(1f, 150f)  // Pérdidas
+        BarEntry(0f, ganancias.toFloat()), // Ganancias
+        BarEntry(1f, perdidas.toFloat())   // Pérdidas
     )
 
     val dataSet = BarDataSet(entries, "").apply {
         colors = listOf(
-            Color.parseColor("#4CAF50"), 
-            Color.parseColor("#F44336")
+            Color.parseColor("#4CAF50"), // Color para ganancias
+            Color.parseColor("#F44336") // Color para pérdidas
         )
         valueTextColor = Color.BLACK
         valueTextSize = 14f
 
-        // Bordes redondeados en las barras
         setDrawValues(true)
         barShadowColor = Color.LTGRAY // Sombra detrás de las barras (opcional)
     }
@@ -123,39 +146,37 @@ fun GraficoGananciasPerdidas() {
                 BarChart(context).apply {
                     data = barData
 
-                    // Configuración del eje X (etiquetas personalizadas)
                     xAxis.apply {
                         position = XAxis.XAxisPosition.BOTTOM
                         setDrawGridLines(false)
                         granularity = 1f // Intervalos fijos entre valores en el eje X
                         textColor = Color.BLACK
                         textSize = 12f
-                        valueFormatter = IndexAxisValueFormatter(listOf("Ganancias", "Pérdidas")) // Etiquetas correctas
+                        valueFormatter =
+                            IndexAxisValueFormatter(listOf("Ganancias", "Pérdidas")) // Etiquetas correctas
                     }
 
-                    // Configuración del eje izquierdo (Y)
                     axisLeft.apply {
                         textColor = Color.BLACK
                         textSize = 12f
                         setDrawGridLines(true)
                     }
 
-                    // Deshabilitar el eje derecho (Y)
                     axisRight.isEnabled = false
 
-                    // Configuración general del gráfico
-                    description.isEnabled = false // Ocultar descripción predeterminada del gráfico
+                    description.isEnabled = false
 
-                    legend.isEnabled = false // Ocultar la leyenda
+                    legend.isEnabled = false
 
-                    setFitBars(true) // Ajustar las barras al espacio disponible
+                    setFitBars(true)
 
-                    animateY(1500) // Animación vertical al cargar el gráfico
+                    animateY(1500)
 
-                    setExtraOffsets(10f, 10f, 10f, 10f) // Espaciado adicional para evitar cortes visuales en los bordes del gráfico.
-
+                    setExtraOffsets(10f, 10f, 10f, 10f)
                 }
             }
         )
     }
 }
+
+

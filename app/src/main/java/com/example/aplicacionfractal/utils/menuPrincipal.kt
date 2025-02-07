@@ -35,7 +35,9 @@ import com.example.aplicacionfractal.ui.theme.ColorSecundario
 @Composable
 fun MenuPrincipal(
     navController: NavHostController,
-    content: @Composable (Any?) -> Unit
+    selectedItemIndex: Int,
+    onSelectedItemChange: (Int) -> Unit,
+    content: @Composable () -> Unit
 ) {
     val items = listOf(
         NavigationItem("Facturas", Icons.Filled.Home),
@@ -43,13 +45,10 @@ fun MenuPrincipal(
         NavigationItem("Clientes", Icons.Filled.DateRange),
         NavigationItem("Hitos", Icons.Filled.Build)
     )
-    var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
         bottomBar = {
-            Box(
-                contentAlignment = Alignment.TopCenter
-            ) {
+            Box(contentAlignment = Alignment.TopCenter) {
                 BottomAppBar(
                     containerColor = ColorPrimario,
                     contentColor = Color.White,
@@ -68,10 +67,10 @@ fun MenuPrincipal(
                                 label = { Text(item.title, fontSize = 12.sp) },
                                 selected = selectedItemIndex == index,
                                 onClick = {
-                                    selectedItemIndex = index
+                                    onSelectedItemChange(index)
                                     when (index) {
                                         0 -> navController.navigate("pantallaPrincipal")
-                                        1 -> navController.navigate("pantallaPago")
+                                        1 -> navController.navigate("pantallaGastos")
                                         2 -> navController.navigate("pantallaAgenda")
                                         3 -> navController.navigate("pantallaAlumnos")
                                     }
@@ -82,9 +81,7 @@ fun MenuPrincipal(
                     }
                 }
                 FloatingActionButton(
-                    onClick = {
-                        navController.navigate("pantallaAddFactura")
-                    },
+                    onClick = { navController.navigate("pantallaAddFactura") },
                     containerColor = ColorSecundario,
                     contentColor = Color.White,
                     modifier = Modifier.offset(y = (-25).dp)
@@ -95,14 +92,13 @@ fun MenuPrincipal(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            content(innerPadding)
+            content()
         }
     }
 }
+
 
 data class NavigationItem(
     val title: String,
     val icon: ImageVector
 )
-
-

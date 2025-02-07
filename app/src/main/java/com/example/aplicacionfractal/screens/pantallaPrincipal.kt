@@ -58,9 +58,15 @@ import java.util.Locale
 @Composable
 fun PantallaPrincipal(
     navController: NavHostController,
-    facturaViewModel: FacturaViewModel = viewModel()
+    facturaViewModel: FacturaViewModel = viewModel(),
+    selectedItemIndex: Int,
+    onSelectedItemChange: (Int) -> Unit
 ) {
-    MenuPrincipal(navController = navController) {
+    MenuPrincipal(
+        navController = navController,
+        selectedItemIndex = selectedItemIndex,
+        onSelectedItemChange = onSelectedItemChange
+    ) {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(

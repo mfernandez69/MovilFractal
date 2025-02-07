@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.example.aplicacionfractal.screens.PantallaAddFactura
+import com.example.aplicacionfractal.screens.PantallaGastos
 import com.example.aplicacionfractal.screens.PantallaPrincipal
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -18,6 +19,9 @@ fun NavigationWrapper(navHostController: NavHostController) {
         }
         composable("pantallaAddFactura") {
             PantallaAddFactura(navHostController)
+        }
+        composable("pantallaGastos") {
+            PantallaGastos(navHostController)
         }
     }
 }

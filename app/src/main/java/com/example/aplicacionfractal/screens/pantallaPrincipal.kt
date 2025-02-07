@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -105,7 +106,8 @@ fun ListadoFacturas(facturaViewModel: FacturaViewModel) {
                 FacturaItem(
                     factura,
                     onEdit = { /* Lógica para editar */ },
-                    onDelete = { facturaViewModel.eliminarFactura(factura) })
+                    onDelete = { facturaViewModel.eliminarFactura(factura) }
+                )
             }
         }
     }
@@ -120,6 +122,7 @@ fun FacturaItem(
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val fechaFormateada = factura.fechaEmision?.toDate()?.let { dateFormat.format(it) } ?: "Fecha no disponible"
     var expanded by remember { mutableStateOf(false) } // Controla si el footer está visible o no
+    var showDialog by remember { mutableStateOf(false) } // Controla si se muestra el diálogo de confirmación
 
     Card(
         modifier = Modifier
@@ -158,11 +161,39 @@ fun FacturaItem(
                     Button(onClick = onEdit) {
                         Text("Editar")
                     }
-                    Button(onClick = onDelete, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
+                    Button(
+                        onClick = { showDialog = true }, // Muestra el diálogo de confirmación
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
                         Text("Eliminar", color = Color.White)
                     }
                 }
             }
         }
+    }
+
+    // Diálogo de confirmación para eliminar la factura
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false }, // Cierra el diálogo al tocar fuera de él
+            title = { Text("Confirmar eliminación") },
+            text = { Text("¿Estás seguro de que quieres eliminar esta factura?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false // Cierra el diálogo
+                        onDelete() // Llama a la función para eliminar la factura
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Eliminar", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) { // Cierra el diálogo sin eliminar
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }

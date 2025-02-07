@@ -78,30 +78,31 @@ fun Graficos(){
     ){
         item {
             GraficoGananciasPerdidas()
-            GraficoGananciasPerdidas()
         }
     }
 }
 @Composable
 fun GraficoGananciasPerdidas() {
-
     val entries = listOf(
-        BarEntry(1f, 300f), // Ganancias
-        BarEntry(2f, 150f)  // Pérdidas
+        BarEntry(0f, 300f), // Ganancias (ajustamos a 0f para que las etiquetas coincidan)
+        BarEntry(1f, 150f)  // Pérdidas
     )
-
 
     val dataSet = BarDataSet(entries, "").apply {
         colors = listOf(
-            Color.parseColor("#4CAF50"),
+            Color.parseColor("#4CAF50"), 
             Color.parseColor("#F44336")
         )
         valueTextColor = Color.BLACK
         valueTextSize = 14f
+
+        // Bordes redondeados en las barras
+        setDrawValues(true)
+        barShadowColor = Color.LTGRAY // Sombra detrás de las barras (opcional)
     }
 
     val barData = BarData(dataSet).apply {
-        barWidth = 0.5f
+        barWidth = 0.4f // Ajustar el ancho de las barras
     }
 
     Box(
@@ -111,7 +112,7 @@ fun GraficoGananciasPerdidas() {
             .shadow(6.dp, shape = RoundedCornerShape(16.dp))
             .background(ComposeColor.White, shape = RoundedCornerShape(16.dp))
             .padding(16.dp)
-    ){
+    ) {
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
@@ -122,37 +123,39 @@ fun GraficoGananciasPerdidas() {
                 BarChart(context).apply {
                     data = barData
 
-
+                    // Configuración del eje X (etiquetas personalizadas)
                     xAxis.apply {
                         position = XAxis.XAxisPosition.BOTTOM
                         setDrawGridLines(false)
-                        granularity = 1f
+                        granularity = 1f // Intervalos fijos entre valores en el eje X
                         textColor = Color.BLACK
                         textSize = 12f
-                        valueFormatter = IndexAxisValueFormatter(listOf("Ganancias", "Pérdidas"))
+                        valueFormatter = IndexAxisValueFormatter(listOf("Ganancias", "Pérdidas")) // Etiquetas correctas
                     }
 
-
+                    // Configuración del eje izquierdo (Y)
                     axisLeft.apply {
                         textColor = Color.BLACK
                         textSize = 12f
                         setDrawGridLines(true)
                     }
 
+                    // Deshabilitar el eje derecho (Y)
                     axisRight.isEnabled = false
 
-                    description.isEnabled = false
+                    // Configuración general del gráfico
+                    description.isEnabled = false // Ocultar descripción predeterminada del gráfico
 
-                    legend.isEnabled = false
+                    legend.isEnabled = false // Ocultar la leyenda
 
-                    setFitBars(true)
+                    setFitBars(true) // Ajustar las barras al espacio disponible
 
-                    animateY(1500) // Animación vertical al cargar el gráfico (duración: 1500 ms)
+                    animateY(1500) // Animación vertical al cargar el gráfico
 
                     setExtraOffsets(10f, 10f, 10f, 10f) // Espaciado adicional para evitar cortes visuales en los bordes del gráfico.
+
                 }
             }
         )
     }
-
 }

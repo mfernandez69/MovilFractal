@@ -35,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.aplicacionfractal.data.models.Emisor
 import com.example.aplicacionfractal.data.models.Factura
+import com.example.aplicacionfractal.data.models.Receptor
 import com.example.aplicacionfractal.utils.MenuPrincipal
 import com.example.aplicacionfractal.viewModels.FacturaViewModel
 import kotlinx.coroutines.launch
@@ -107,6 +110,7 @@ fun ListadoFacturas(facturaViewModel: FacturaViewModel) {
             items(facturas) { factura ->
                 FacturaItem(
                     factura,
+                    facturaViewModel = facturaViewModel,
                     onEdit = { /* Lógica para editar */ },
                     onDelete = { facturaViewModel.eliminarFactura(factura) }
                 )
@@ -118,35 +122,40 @@ fun ListadoFacturas(facturaViewModel: FacturaViewModel) {
 @Composable
 fun FacturaItem(
     factura: Factura,
+    facturaViewModel: FacturaViewModel,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val porcentajeIva= 21
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val fechaFormateada = factura.fechaEmision?.toDate()?.let { dateFormat.format(it) } ?: "Fecha no disponible"
-    var expanded by remember { mutableStateOf(false) } // Controla si el footer está visible o no
-    var showDialog by remember { mutableStateOf(false) } // Controla si se muestra el diálogo de confirmación
+    val porcentajeIva = 21
+    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    var expanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    var emisor by remember { mutableStateOf<Emisor?>(null) }
+    var receptor by remember { mutableStateOf<Receptor?>(null) }
 
     // Configuración para formatear números con coma como separador decimal
     val decimalFormatSymbols = DecimalFormatSymbols(Locale.getDefault()).apply {
-        decimalSeparator = ',' // Usar coma como separador decimal
+        decimalSeparator = ','
     }
-    val decimalFormat = DecimalFormat("#,##0.00", decimalFormatSymbols) // Formato con 2 decimales
+    val decimalFormat = DecimalFormat("#,##0.00", decimalFormatSymbols)
 
-    val baseImponibleFormatted = decimalFormat.format(factura.baseImponible)
-    val ivaFormatted = decimalFormat.format(factura.baseImponible * porcentajeIva / 100)
-    val totalFormatted = decimalFormat.format(factura.total)
+    LaunchedEffect(factura, expanded) {
+        if (expanded && (emisor == null || receptor == null)) {
+            emisor = facturaViewModel.obtenerEmisor(factura.emisorId)
+            receptor = facturaViewModel.obtenerReceptor(factura.receptorId)
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .shadow(4.dp, shape = RoundedCornerShape(8.dp))
             .background(Color.Transparent)
-            .clickable { expanded = !expanded }, // Activa/desactiva el footer al pulsar la tarjeta
+            .clickable { expanded = !expanded },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
-
     ) {
         Column(
             modifier = Modifier
@@ -158,16 +167,32 @@ fun FacturaItem(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-            // Información principal de la factura
+            Text(text = "Fecha: ${factura.fechaEmision?.toDate()?.let { dateFormat.format(it) } ?: "No disponible"}")
+            Text(text = "Base Imponible: ${decimalFormat.format(factura.baseImponible)}€")
+            Text(text = "IVA (${porcentajeIva}%): ${decimalFormat.format(factura.baseImponible * porcentajeIva / 100)}€")
+            Text(text = "Total: ${decimalFormat.format(factura.total)}€", fontWeight = FontWeight.Bold)
 
-            Text(text = "Fecha: ${factura.fechaEmision?.toDate()?.let { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(it) } ?: "No disponible"}")
-            Text(text = "Base Imponible: $baseImponibleFormatted€")
-            Text(text = "IVA (${porcentajeIva}%): $ivaFormatted€")
-            Text(text = "Total: $totalFormatted€", fontWeight = FontWeight.Bold)
-
-            // Footer desplegable (visible solo si `expanded` es true)
             if (expanded) {
-                Spacer(modifier = Modifier.height(8.dp)) // Espaciado entre el contenido principal y el footer
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Detalles de la Factura", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                emisor?.let { emisor ->
+                    Text("Emisor:", fontWeight = FontWeight.Bold)
+                    Text("NIF: ${emisor.nif}")
+                    Text("Dirección: ${emisor.direccionEmisor}")
+                    Text("Empresa: ${emisor.empresa}")
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                receptor?.let { receptor ->
+                    Text("Receptor:", fontWeight = FontWeight.Bold)
+                    Text("Nombre: ${receptor.cliente}")
+                    Text("CIF: ${receptor.cif}")
+                    Text("Dirección: ${receptor.direccionReceptor}")
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -176,7 +201,7 @@ fun FacturaItem(
                         Text("Editar")
                     }
                     Button(
-                        onClick = { showDialog = true }, // Muestra el diálogo de confirmación
+                        onClick = { showDialog = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                     ) {
                         Text("Eliminar", color = Color.White)
@@ -186,17 +211,16 @@ fun FacturaItem(
         }
     }
 
-    // Diálogo de confirmación para eliminar la factura
     if (showDialog) {
         AlertDialog(
-            onDismissRequest = { showDialog = false }, // Cierra el diálogo al tocar fuera de él
+            onDismissRequest = { showDialog = false },
             title = { Text("Confirmar eliminación") },
             text = { Text("¿Estás seguro de que quieres eliminar esta factura?") },
             confirmButton = {
                 Button(
                     onClick = {
-                        showDialog = false // Cierra el diálogo
-                        onDelete() // Llama a la función para eliminar la factura
+                        showDialog = false
+                        onDelete()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
@@ -204,10 +228,11 @@ fun FacturaItem(
                 }
             },
             dismissButton = {
-                Button(onClick = { showDialog = false }) { // Cierra el diálogo sin eliminar
+                Button(onClick = { showDialog = false }) {
                     Text("Cancelar")
                 }
             }
         )
     }
 }
+

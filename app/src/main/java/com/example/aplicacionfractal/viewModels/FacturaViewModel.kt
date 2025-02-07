@@ -9,6 +9,7 @@ import com.example.aplicacionfractal.data.dao.ReceptorDao
 import com.example.aplicacionfractal.data.models.Emisor
 import com.example.aplicacionfractal.data.models.Factura
 import com.example.aplicacionfractal.data.models.Receptor
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,6 +63,25 @@ class FacturaViewModel : ViewModel() {
         } catch (e: Exception) {
             _error.value = "Error eliminando factura: ${e.localizedMessage}"
             Log.e("FacturaVM", "Error al eliminar factura", e)
+        }
+    }
+    suspend fun obtenerEmisor(documentReference: DocumentReference?): Emisor? {
+        return try {
+            documentReference?.let { emisorDao.obtenerEmisor(it.id) }
+        } catch (e: Exception) {
+            _error.value = "Error obteniendo emisor: ${e.localizedMessage}"
+            Log.e("FacturaVM", "Error al obtener emisor", e)
+            null
+        }
+    }
+
+    suspend fun obtenerReceptor(documentReference: DocumentReference?): Receptor? {
+        return try {
+            documentReference?.let { receptorDao.obtenerReceptor(it.id) }
+        } catch (e: Exception) {
+            _error.value = "Error obteniendo receptor: ${e.localizedMessage}"
+            Log.e("FacturaVM", "Error al obtener receptor", e)
+            null
         }
     }
 

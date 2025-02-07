@@ -54,6 +54,8 @@ import com.example.aplicacionfractal.data.models.Factura
 import com.example.aplicacionfractal.utils.MenuPrincipal
 import com.example.aplicacionfractal.viewModels.FacturaViewModel
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -119,11 +121,21 @@ fun FacturaItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val porcentajeIva= 21
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val fechaFormateada = factura.fechaEmision?.toDate()?.let { dateFormat.format(it) } ?: "Fecha no disponible"
     var expanded by remember { mutableStateOf(false) } // Controla si el footer está visible o no
     var showDialog by remember { mutableStateOf(false) } // Controla si se muestra el diálogo de confirmación
 
+    // Configuración para formatear números con coma como separador decimal
+    val decimalFormatSymbols = DecimalFormatSymbols(Locale.getDefault()).apply {
+        decimalSeparator = ',' // Usar coma como separador decimal
+    }
+    val decimalFormat = DecimalFormat("#,##0.00", decimalFormatSymbols) // Formato con 2 decimales
+
+    val baseImponibleFormatted = decimalFormat.format(factura.baseImponible)
+    val ivaFormatted = decimalFormat.format(factura.baseImponible * porcentajeIva / 100)
+    val totalFormatted = decimalFormat.format(factura.total)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,22 +146,24 @@ fun FacturaItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
+
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Información principal de la factura
             Text(
                 text = "Factura Nº ${factura.nFactura}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-            Text(text = "Fecha: $fechaFormateada")
-            Text(text = "Base Imponible: ${factura.baseImponible}€")
-            Text(text = "IVA: ${factura.IVA}%")
-            Text(text = "Total: ${factura.total}€", fontWeight = FontWeight.Bold)
+            // Información principal de la factura
+
+            Text(text = "Fecha: ${factura.fechaEmision?.toDate()?.let { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(it) } ?: "No disponible"}")
+            Text(text = "Base Imponible: $baseImponibleFormatted€")
+            Text(text = "IVA (${porcentajeIva}%): $ivaFormatted€")
+            Text(text = "Total: $totalFormatted€", fontWeight = FontWeight.Bold)
 
             // Footer desplegable (visible solo si `expanded` es true)
             if (expanded) {

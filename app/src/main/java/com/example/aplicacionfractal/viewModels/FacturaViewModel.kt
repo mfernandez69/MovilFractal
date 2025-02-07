@@ -54,4 +54,15 @@ class FacturaViewModel : ViewModel() {
             }
         }
     }
+    fun eliminarFactura(factura: Factura) = viewModelScope.launch {
+        try {
+            factura.nFactura.let { facturaDao.borrarFactura(it) }
+            _facturas.value = _facturas.value.filter { it.nFactura != factura.nFactura }
+            _error.value = null
+        } catch (e: Exception) {
+            _error.value = "Error eliminando factura: ${e.localizedMessage}"
+            Log.e("FacturaVM", "Error al eliminar factura", e)
+        }
+    }
+
 }

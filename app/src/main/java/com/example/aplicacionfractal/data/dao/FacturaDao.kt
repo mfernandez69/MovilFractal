@@ -37,7 +37,21 @@ class FacturaDao(private val db: FirebaseFirestore) {
         facturasRef.document(id).set(factura).await()
     }
 
-    suspend fun borrarFactura(id: String) {
-        facturasRef.document(id).delete().await()
+    suspend fun borrarFactura(nFactura: Int) {
+        try {
+            // Busca el documento con el campo nFactura igual al valor proporcionado
+            val querySnapshot = facturasRef.whereEqualTo("nFactura", nFactura).get().await()
+            if (querySnapshot.documents.isNotEmpty()) {
+                for (document in querySnapshot.documents) {
+                    document.reference.delete().await() // Elimina cada documento encontrado
+                    Log.d("Firestore", "Factura con nFactura $nFactura eliminada")
+                }
+            } else {
+                Log.d("Firestore", "No se encontró ninguna factura con nFactura $nFactura")
+            }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error al eliminar factura con nFactura $nFactura: ${e.message}")
+        }
     }
+
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.example.aplicacionfractal.utils.MenuPrincipal
+import com.example.aplicacionfractal.utils.RoundedBarChartRenderer
 import com.example.aplicacionfractal.utils.TabMultiple
 import com.example.aplicacionfractal.viewModels.GastosViewModel
 import com.github.mikephil.charting.charts.BarChart
@@ -72,19 +73,21 @@ fun PantallaGastos(
         }
     }
 }
+
 @Composable
-fun Graficos(){
-    LazyColumn (
+fun Graficos() {
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
-    ){
+    ) {
         item {
             GraficoGananciasPerdidas()
         }
     }
 }
+
 @Composable
 fun GraficoGananciasPerdidas(viewModel: GastosViewModel = GastosViewModel()) {
     // Observar las ganancias y pérdidas desde el ViewModel
@@ -149,14 +152,16 @@ fun GraficoGananciasPerdidas(viewModel: GastosViewModel = GastosViewModel()) {
                     xAxis.apply {
                         position = XAxis.XAxisPosition.BOTTOM
                         setDrawGridLines(false)
-                        granularity = 1f // Intervalos fijos entre valores en el eje X
+                        granularity = 1f
                         textColor = Color.BLACK
                         textSize = 12f
                         valueFormatter =
-                            IndexAxisValueFormatter(listOf("Ganancias", "Pérdidas")) // Etiquetas correctas
+                            IndexAxisValueFormatter(listOf("Ganancias", "Pérdidas"))
                     }
 
                     axisLeft.apply {
+                        axisMinimum = 0f // Comienza desde 0
+                        granularity = 10f // Intervalos proporcionales
                         textColor = Color.BLACK
                         textSize = 12f
                         setDrawGridLines(true)
@@ -173,9 +178,14 @@ fun GraficoGananciasPerdidas(viewModel: GastosViewModel = GastosViewModel()) {
                     animateY(1500)
 
                     setExtraOffsets(10f, 10f, 10f, 10f)
+
+                    // Asignar el renderer personalizado para bordes redondeados
+                    //renderer = RoundedBarChartRenderer(this, animator, viewPortHandler)
+                    invalidate() // Forzar la actualización del gráfico
                 }
             }
         )
+
     }
 }
 

@@ -18,6 +18,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -149,7 +151,10 @@ fun ContentAddView(
                     onCheckedChange = {
                         emitida = it
                         recibida = !it
-                    }
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
                 )
             }
             Row(
@@ -166,7 +171,10 @@ fun ContentAddView(
                     onCheckedChange = {
                         emitida = !it
                         recibida = it
-                    }
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
                 )
             }
 

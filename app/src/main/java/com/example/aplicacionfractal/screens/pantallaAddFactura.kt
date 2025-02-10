@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -103,6 +104,11 @@ fun ContentAddView(
     emisorViewModel: EmisorViewModel,
     receptorViewModel: ReceptorViewModel
 ) {
+    var porcentajeiva by remember { mutableIntStateOf(21) }
+    var iva0 by remember { mutableStateOf(false) }
+    var iva10 by remember { mutableStateOf(false) }
+    var iva21 by remember { mutableStateOf(true) }
+
     var emitida by remember { mutableStateOf(true) }
     var recibida by remember { mutableStateOf(false) }
     var numFactura by remember { mutableStateOf("") }
@@ -187,21 +193,6 @@ fun ContentAddView(
                 }
             },
             label = { Text(text = "Número de Factura") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-        )
-
-        OutlinedTextField(
-            value = baseImponible,
-            onValueChange = {
-                if (it.all { char -> char.isDigit() }) {
-                    baseImponible = it
-                }
-            },
-            label = { Text(text = "Base imponible") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -295,10 +286,108 @@ fun ContentAddView(
             keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
+        Text(
+            text = "Porcentaje de iva",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 30.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "0%"
+                )
+                Checkbox(
+                    checked = iva0,
+                    onCheckedChange = {
+                        iva0 = it
+                        iva10 = false
+                        iva21 = false
+                        porcentajeiva = 0
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "10%"
+                )
+                Checkbox(
+                    checked = iva10,
+                    onCheckedChange = {
+                        iva10 = it
+                        iva0 = false
+                        iva21 = false
+                        porcentajeiva = 10
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "21%"
+                )
+                Checkbox(
+                    checked = iva21,
+                    onCheckedChange = {
+                        iva21 = it
+                        iva0 = false
+                        iva10 = false
+                        porcentajeiva = 21
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+        }
+
+        OutlinedTextField(
+            value = baseImponible,
+            onValueChange = {
+                if (it.all { char -> char.isDigit() }) {
+                    baseImponible = it
+                }
+            },
+            label = { Text(text = "Base imponible") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(bottom = 15.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
+        )
+
         Button(
             onClick = {
                 val baseImponibleDouble = baseImponible.toDoubleOrNull() ?: 0.0
-                val iva = baseImponibleDouble * 0.21 // 21% IVA
+                val iva = baseImponibleDouble * porcentajeiva / 100 // % IVA
                 val total = baseImponibleDouble + iva
 
                 val emisor = Emisor(

@@ -168,7 +168,7 @@ fun FacturaItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val porcentajeIva = 21
+    val porcentajeIva = factura.IVA * 100 / factura.baseImponible
     val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     var expanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }

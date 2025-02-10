@@ -2,10 +2,12 @@ package com.example.aplicacionfractal.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,6 +17,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -97,6 +103,8 @@ fun ContentAddView(
     emisorViewModel: EmisorViewModel,
     receptorViewModel: ReceptorViewModel
 ) {
+    var emitida by remember { mutableStateOf(true) }
+    var recibida by remember { mutableStateOf(false) }
     var numFactura by remember { mutableStateOf("") }
     var baseImponible by remember { mutableStateOf("") }
 
@@ -112,16 +120,65 @@ fun ContentAddView(
 
     Column(
         modifier = Modifier
-            .padding(top = 30.dp)
+            .padding(top = 15.dp)
             .fillMaxSize()
             .verticalScroll(
                 state = rememberScrollState(),
                 enabled = true,
                 flingBehavior = null,
                 reverseScrolling = false
-            ),
+            )
+            .requiredHeight(1100.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 30.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ){
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = "Emitida"
+                )
+                Checkbox(
+                    checked = emitida,
+                    onCheckedChange = {
+                        emitida = it
+                        recibida = !it
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = "Recibida"
+                )
+                Checkbox(
+                    checked = recibida,
+                    onCheckedChange = {
+                        emitida = !it
+                        recibida = it
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+
+        }
         OutlinedTextField(
             value = numFactura,
             onValueChange = {
@@ -134,7 +191,7 @@ fun ContentAddView(
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
                 .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
         )
 
         OutlinedTextField(
@@ -149,7 +206,7 @@ fun ContentAddView(
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
                 .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
         )
 
         // Campos para Emisor
@@ -169,7 +226,8 @@ fun ContentAddView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 15.dp),
+            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
         OutlinedTextField(
@@ -179,7 +237,8 @@ fun ContentAddView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 15.dp),
+            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
         OutlinedTextField(
@@ -189,7 +248,8 @@ fun ContentAddView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 15.dp),
+            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
         // Campos para Receptor
@@ -209,7 +269,8 @@ fun ContentAddView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 15.dp),
+            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
         OutlinedTextField(
@@ -219,7 +280,8 @@ fun ContentAddView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 15.dp),
+            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
         OutlinedTextField(
@@ -229,7 +291,8 @@ fun ContentAddView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 15.dp),
+            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
         Button(
@@ -255,7 +318,8 @@ fun ContentAddView(
                     fechaEmision = Timestamp(Date().toInstant()),
                     baseImponible = baseImponibleDouble,
                     IVA = iva,
-                    total = total
+                    total = total,
+                    emitida = emitida
                 )
 
                 emisorViewModel.agregarEmisor(emisor)
@@ -270,5 +334,7 @@ fun ContentAddView(
         ) {
             Text(text = "Agregar Factura", fontSize = 16.sp)
         }
+
+        //Spacer(modifier = Modifier.size(150.dp))
     }
 }

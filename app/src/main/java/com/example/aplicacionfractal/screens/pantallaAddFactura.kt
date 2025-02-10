@@ -2,6 +2,7 @@ package com.example.aplicacionfractal.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,6 +99,8 @@ fun ContentAddView(
     emisorViewModel: EmisorViewModel,
     receptorViewModel: ReceptorViewModel
 ) {
+    var emitida by remember { mutableStateOf(true) }
+    var recibida by remember { mutableStateOf(false) }
     var numFactura by remember { mutableStateOf("") }
     var baseImponible by remember { mutableStateOf("") }
 
@@ -122,6 +126,29 @@ fun ContentAddView(
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(){
+            Text(
+                text = "Emitida"
+            )
+            Checkbox(
+                checked = emitida,
+                onCheckedChange = {
+                    emitida = it
+                    recibida = !it
+                }
+            )
+            Text(
+                text = "Recibida"
+            )
+            Checkbox(
+                checked = recibida,
+                onCheckedChange = {
+                    emitida = !it
+                    recibida = it
+                }
+            )
+
+        }
         OutlinedTextField(
             value = numFactura,
             onValueChange = {
@@ -255,7 +282,8 @@ fun ContentAddView(
                     fechaEmision = Timestamp(Date().toInstant()),
                     baseImponible = baseImponibleDouble,
                     IVA = iva,
-                    total = total
+                    total = total,
+                    emitida = emitida
                 )
 
                 emisorViewModel.agregarEmisor(emisor)

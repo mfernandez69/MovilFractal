@@ -26,6 +26,9 @@ data class Factura(
     var nFactura: Int = 0,
 
     @get:PropertyName("total") @set:PropertyName("total")
-    var total: Double = 0.0
+    var total: Double = 0.0,
+
+    @get:PropertyName("emitido") @set:PropertyName("emitido")
+    var emitida: Boolean=false
 )
 

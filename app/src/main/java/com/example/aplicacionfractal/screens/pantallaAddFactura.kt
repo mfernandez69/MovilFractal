@@ -105,9 +105,10 @@ fun ContentAddView(
     receptorViewModel: ReceptorViewModel
 ) {
     var porcentajeiva by remember { mutableIntStateOf(21) }
-    var iva0 by remember { mutableStateOf(false) }
-    var iva10 by remember { mutableStateOf(false) }
-    var iva21 by remember { mutableStateOf(true) }
+    var ivaExento by remember { mutableStateOf(false) }
+    var ivaSuperreducido by remember { mutableStateOf(false) }
+    var ivaReducido by remember { mutableStateOf(false) }
+    var ivaGeneral by remember { mutableStateOf(true) }
 
     var emitida by remember { mutableStateOf(true) }
     var recibida by remember { mutableStateOf(false) }
@@ -286,6 +287,8 @@ fun ContentAddView(
             keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
         )
 
+        // PORCENTAJE DE IVA
+
         Text(
             text = "Porcentaje de iva",
             fontWeight = FontWeight.Bold,
@@ -308,14 +311,15 @@ fun ContentAddView(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "0%"
+                    text = "Exento - 0%"
                 )
                 Checkbox(
-                    checked = iva0,
+                    checked = ivaExento,
                     onCheckedChange = {
-                        iva0 = it
-                        iva10 = false
-                        iva21 = false
+                        ivaExento = it
+                        ivaSuperreducido = false
+                        ivaReducido = false
+                        ivaGeneral = false
                         porcentajeiva = 0
                     },
                     colors = CheckboxDefaults.colors(
@@ -330,14 +334,38 @@ fun ContentAddView(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "10%"
+                    text = "Superreducido - 4%"
                 )
                 Checkbox(
-                    checked = iva10,
+                    checked = ivaReducido,
                     onCheckedChange = {
-                        iva10 = it
-                        iva0 = false
-                        iva21 = false
+                        ivaSuperreducido = it
+                        ivaExento = false
+                        ivaReducido = false
+                        ivaGeneral = false
+                        porcentajeiva = 4
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Reducido - 10%"
+                )
+                Checkbox(
+                    checked = ivaReducido,
+                    onCheckedChange = {
+                        ivaReducido = it
+                        ivaExento = false
+                        ivaSuperreducido = false
+                        ivaGeneral = false
                         porcentajeiva = 10
                     },
                     colors = CheckboxDefaults.colors(
@@ -352,14 +380,15 @@ fun ContentAddView(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "21%"
+                    text = "General - 21%"
                 )
                 Checkbox(
-                    checked = iva21,
+                    checked = ivaGeneral,
                     onCheckedChange = {
-                        iva21 = it
-                        iva0 = false
-                        iva10 = false
+                        ivaGeneral = it
+                        ivaExento = false
+                        ivaSuperreducido = false
+                        ivaReducido = false
                         porcentajeiva = 21
                     },
                     colors = CheckboxDefaults.colors(

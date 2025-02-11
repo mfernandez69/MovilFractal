@@ -18,23 +18,6 @@ class EmisorViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-//    init {
-//        cargarEmisores()
-//    }
-
-//    private fun cargarEmisores() {
-//        viewModelScope.launch {
-//            try {
-//                val emisoresObtenidos = emisorDao.obtenerEmisores()
-//                _emisores.value = emisoresObtenidos.sortedByDescending { it.nif }
-//                _error.value = null
-//            } catch (e: Exception) {
-//                _error.value = "Error cargando emisores: ${e.localizedMessage}"
-//                Log.e("EmisorVM", "Error al cargar emisores", e)
-//            }
-//        }
-//    }
-
     fun agregarEmisor(emisor: Emisor) = viewModelScope.launch {
         viewModelScope.launch {
             try {

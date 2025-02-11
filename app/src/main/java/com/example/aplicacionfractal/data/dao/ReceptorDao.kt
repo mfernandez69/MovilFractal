@@ -35,4 +35,9 @@ class ReceptorDao(private val db: FirebaseFirestore) {
     fun obtenerReceptorId(id: String): DocumentReference? {
         return receptoresRef.document(id)
     }
+    suspend fun agregarOActualizarReceptor(receptor: Receptor): DocumentReference {
+        val docRef = receptoresRef.document(receptor.cif)
+        docRef.set(receptor).await()
+        return docRef
+    }
 }

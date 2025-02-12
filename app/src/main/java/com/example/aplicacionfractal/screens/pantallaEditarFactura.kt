@@ -2,6 +2,7 @@ package com.example.aplicacionfractal.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,7 @@ import com.example.aplicacionfractal.viewModels.FacturaViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +95,8 @@ fun ContentEditView(
 ) {
     var numFactura by remember { mutableStateOf(factura.nFactura.toString()) }
     var baseImponible by remember { mutableStateOf(factura.baseImponible.toString()) }
+    var porcentajeIVA by remember { mutableStateOf(((factura.IVA / factura.baseImponible) * 100).roundToInt()) }
+    var total by remember { mutableStateOf(factura.total) }
 
     // Emisor
     var empresaEmisor by remember { mutableStateOf(emisorInicial?.empresa ?: "") }
@@ -104,6 +108,7 @@ fun ContentEditView(
     var cifReceptor by remember { mutableStateOf(receptorInicial?.cif ?: "") }
     var direccionReceptor by remember { mutableStateOf(receptorInicial?.direccionReceptor ?: "") }
 
+    val ivaOptions = listOf(Pair(0, "0%"), Pair(4, "4%"), Pair(10, "10%"), Pair(21, "21%"))
     Column(
         modifier = Modifier
             .padding(top = 15.dp)
@@ -143,14 +148,70 @@ fun ContentEditView(
         OutlinedTextField(value = direccionReceptor, onValueChange = { direccionReceptor = it }, label = { Text(text = "Dirección del receptor") },
             modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(value = baseImponible, onValueChange = { if (it.all { char -> char.isDigit() }) baseImponible = it },
-            label = { Text(text = "Base imponible") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = baseImponible,
+            onValueChange = {
+                if (it.all { char -> char.isDigit() || char == '.' }) {
+                    baseImponible = it
+                    recalcularTotal(baseImponible.toDoubleOrNull() ?: 0.0, porcentajeIVA) { newTotal ->
+                        total = newTotal
+                    }
+                }
+            },
+            label = { Text(text = "Base imponible") },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp)
+        )
+
+        Text(
+            text = "Porcentaje de IVA",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp, vertical = 8.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            ivaOptions.forEach { option ->
+                Button(
+                    onClick = {
+                        porcentajeIVA = option.first
+                        recalcularTotal(baseImponible.toDoubleOrNull() ?: 0.0, porcentajeIVA) { newTotal ->
+                            total = newTotal
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (porcentajeIVA == option.first) ColorPrimario else ColorSecundario,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(2.dp)
+                ) {
+                    Text(text = option.second)
+                }
+            }
+        }
+
+        Text(
+            text = "Total: ${String.format("%.2f", total)} €",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp, vertical = 16.dp)
+        )
 
         Button(
             onClick = {
                 val baseImponibleDouble = baseImponible.toDoubleOrNull() ?: 0.0
-                val iva = baseImponibleDouble * 0.21 // 21% de IVA
-                val total = baseImponibleDouble + iva
+                val iva = baseImponibleDouble * (porcentajeIVA / 100.0)
 
                 val emisorActualizado = Emisor(direccionEmisor, empresaEmisor, nifEmisor)
                 val receptorActualizado = Receptor(direccionReceptor, clienteReceptor, cifReceptor)
@@ -162,15 +223,20 @@ fun ContentEditView(
                     total = total
                 )
 
-                // Usa un coroutineScope para esperar la operación
                 CoroutineScope(Dispatchers.Main).launch {
                     facturaViewModel.actualizarFactura(facturaActualizada, emisorActualizado, receptorActualizado)
                     navController.popBackStack()
                 }
             },
-            colors = ButtonDefaults.textButtonColors(containerColor = ColorSecundario, contentColor = Color.White)
+            colors = ButtonDefaults.buttonColors(containerColor = ColorSecundario, contentColor = Color.White),
+            modifier = Modifier.padding(vertical = 16.dp)
         ) {
             Text(text = "Actualizar Factura", fontSize = 16.sp)
         }
     }
+}
+fun recalcularTotal(baseImponible: Double, porcentajeIVA: Int, onTotalCalculated: (Double) -> Unit) {
+    val iva = baseImponible * (porcentajeIVA / 100.0)
+    val total = baseImponible + iva
+    onTotalCalculated(total)
 }

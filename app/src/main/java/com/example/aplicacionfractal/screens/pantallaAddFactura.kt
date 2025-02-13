@@ -117,14 +117,12 @@ fun ContentAddView(
         Pair(21, "General")
     )
     var porcentajeiva by remember { mutableIntStateOf(21) }
-//    var ivaExento by remember { mutableStateOf(false) }
-//    var ivaSuperreducido by remember { mutableStateOf(false) }
-//    var ivaReducido by remember { mutableStateOf(false) }
-//    var ivaGeneral by remember { mutableStateOf(true) }
 
     var emitida by remember { mutableStateOf(true) }
     var recibida by remember { mutableStateOf(false) }
-    var numFactura by remember { mutableStateOf("") }
+
+    val numFactura = facturaViewModel.generarNumeroFactura()
+
     var baseImponible by remember { mutableStateOf("") }
 
     // Emisor
@@ -198,19 +196,14 @@ fun ContentAddView(
             }
 
         }
-        OutlinedTextField(
-            value = numFactura,
-            onValueChange = {
-                if (it.all { char -> char.isDigit() }) {
-                    numFactura = it
-                }
-            },
-            label = { Text(text = "Número de Factura") },
+
+        Text(
+            text = "Numero de factura: $numFactura",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
         )
 
         // Campos para Emisor
@@ -313,10 +306,6 @@ fun ContentAddView(
         Row(
             modifier = Modifier
                 .padding(horizontal = 30.dp),
-//                .background(
-//                    shape = RoundedCornerShape(8.dp),
-//                    color = ColorSecundario
-//                ),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             ivaOptions.forEach { option ->
@@ -335,106 +324,6 @@ fun ContentAddView(
                 }
             }
         }
-
-//        Row(
-//            modifier = Modifier
-//                .padding(horizontal = 30.dp)
-//                .fillMaxWidth(),
-//            horizontalArrangement = Arrangement.Center
-//        ) {
-//            Row(
-//                modifier = Modifier
-//                    .weight(1f),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                Text(
-//                    text = "Exento - 0%"
-//                )
-//                Checkbox(
-//                    checked = ivaExento,
-//                    onCheckedChange = {
-//                        ivaExento = it
-//                        ivaSuperreducido = false
-//                        ivaReducido = false
-//                        ivaGeneral = false
-//                        porcentajeiva = 0
-//                    },
-//                    colors = CheckboxDefaults.colors(
-//                        checkedColor = ColorPrimario
-//                    )
-//                )
-//            }
-//            Row(
-//                modifier = Modifier
-//                    .weight(1f),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                Text(
-//                    text = "Superreducido - 4%"
-//                )
-//                Checkbox(
-//                    checked = ivaReducido,
-//                    onCheckedChange = {
-//                        ivaSuperreducido = it
-//                        ivaExento = false
-//                        ivaReducido = false
-//                        ivaGeneral = false
-//                        porcentajeiva = 4
-//                    },
-//                    colors = CheckboxDefaults.colors(
-//                        checkedColor = ColorPrimario
-//                    )
-//                )
-//            }
-//            Row(
-//                modifier = Modifier
-//                    .weight(1f),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                Text(
-//                    text = "Reducido - 10%"
-//                )
-//                Checkbox(
-//                    checked = ivaReducido,
-//                    onCheckedChange = {
-//                        ivaReducido = it
-//                        ivaExento = false
-//                        ivaSuperreducido = false
-//                        ivaGeneral = false
-//                        porcentajeiva = 10
-//                    },
-//                    colors = CheckboxDefaults.colors(
-//                        checkedColor = ColorPrimario
-//                    )
-//                )
-//            }
-//            Row(
-//                modifier = Modifier
-//                    .weight(1f),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                Text(
-//                    text = "General - 21%"
-//                )
-//                Checkbox(
-//                    checked = ivaGeneral,
-//                    onCheckedChange = {
-//                        ivaGeneral = it
-//                        ivaExento = false
-//                        ivaSuperreducido = false
-//                        ivaReducido = false
-//                        porcentajeiva = 21
-//                    },
-//                    colors = CheckboxDefaults.colors(
-//                        checkedColor = ColorPrimario
-//                    )
-//                )
-//            }
-//        }
 
         OutlinedTextField(
             value = baseImponible,
@@ -519,7 +408,7 @@ fun crearFactura(
     )
 
     val factura = Factura(
-        nFactura = numFactura.toInt(),
+        nFactura = numFactura,
         fechaEmision = Timestamp(Date().toInstant()),
         baseImponible = baseImponibleDouble,
         IVA = iva,

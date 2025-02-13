@@ -28,7 +28,7 @@ class FacturaDao(private val db: FirebaseFirestore) {
         val documentSnapshot = facturasRef.document(id).get().await()
         return documentSnapshot.toObject(Factura::class.java)
     }
-    suspend fun obtenerIdPorNfactura(nFactura: Int): String? {
+    suspend fun obtenerIdPorNfactura(nFactura: String): String? {
         // Realiza una consulta para encontrar el documento con el nFactura dado
         val querySnapshot = facturasRef
             .whereEqualTo("nFactura", nFactura)
@@ -54,7 +54,7 @@ class FacturaDao(private val db: FirebaseFirestore) {
         facturasRef.document(id).set(factura).await()
     }
 
-    suspend fun borrarFactura(nFactura: Int) {
+    suspend fun borrarFactura(nFactura: String) {
         try {
             // Busca el documento con el campo nFactura igual al valor proporcionado
             val querySnapshot = facturasRef.whereEqualTo("nFactura", nFactura).get().await()
@@ -99,7 +99,7 @@ class FacturaDao(private val db: FirebaseFirestore) {
         }
     }
 
-    suspend fun obtenerFacturaPorNumero(numeroFactura: Int): Factura? {
+    suspend fun obtenerFacturaPorNumero(numeroFactura: String): Factura? {
         return try {
             val querySnapshot = facturasRef.whereEqualTo("nFactura", numeroFactura).get().await()
             if (!querySnapshot.isEmpty) {

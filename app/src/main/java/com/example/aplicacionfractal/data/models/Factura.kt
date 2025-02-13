@@ -23,7 +23,7 @@ data class Factura(
     var fechaEmision: Timestamp? = null,
 
     @get:PropertyName("nFactura") @set:PropertyName("nFactura")
-    var nFactura: Int = 0,
+    var nFactura: String = "",
 
     @get:PropertyName("total") @set:PropertyName("total")
     var total: Double = 0.0,

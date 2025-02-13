@@ -18,22 +18,6 @@ class ReceptorViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-//    init {
-////        cargarReceptores()
-////    }
-////
-////    private fun cargarReceptores() {
-////        viewModelScope.launch {
-////            try {
-////                val receptoresObtenidos = receptorDao.obtenerReceptores()
-////                _receptores.value = receptoresObtenidos.sortedByDescending { it.cif }
-////                _error.value = null
-////            } catch (e: Exception) {
-////                _error.value = "Error cargando receptores: ${e.localizedMessage}"
-////                Log.e("ReceptorVM", "Error al cargar receptores", e)
-////            }
-////        }
-////    }
 
     fun agregarReceptor(receptor: Receptor) = viewModelScope.launch {
         viewModelScope.launch {

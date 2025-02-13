@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.aplicacionfractal.screens.ListadoFacturas
 import com.example.aplicacionfractal.screens.ListadoFacturasEmitidas
 import com.example.aplicacionfractal.screens.ListadoFacturasRecibidas
@@ -29,7 +30,7 @@ import com.example.aplicacionfractal.viewModels.FacturaViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun TabMultiple(facturaViewModel: FacturaViewModel){
+fun TabMultiple(facturaViewModel: FacturaViewModel,navController: NavHostController){
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 3 })
     TabRow(
@@ -116,9 +117,9 @@ fun TabMultiple(facturaViewModel: FacturaViewModel){
 
     HorizontalPager(state = pagerState) { page ->
         when (page) {
-            0 -> ListadoFacturasRecibidas(facturaViewModel)
-            1 -> ListadoFacturasEmitidas(facturaViewModel)
-            2 -> ListadoFacturas(facturaViewModel)
+            0 -> ListadoFacturasRecibidas(facturaViewModel,navController)
+            1 -> ListadoFacturasEmitidas(facturaViewModel,navController)
+            2 -> ListadoFacturas(facturaViewModel,navController)
         }
     }
 }

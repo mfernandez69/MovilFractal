@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.aplicacionfractal.data.models.Emisor
 import com.example.aplicacionfractal.data.models.Factura
@@ -82,40 +83,43 @@ fun PantallaPrincipal(
                 verticalArrangement = Arrangement.Top
             ) {
                 Spacer(modifier = Modifier.size(5.dp))
-                TabMultiple(facturaViewModel)
+                TabMultiple(facturaViewModel,navController)
             }
         }
     }
 }
 
 @Composable
-fun ListadoFacturasRecibidas(facturaViewModel: FacturaViewModel) {
+fun ListadoFacturasRecibidas(facturaViewModel: FacturaViewModel,navController: NavHostController) {
     val facturas by facturaViewModel.facturas.collectAsState()
     val facturasRecibidas = facturas.filter { !it.emitida }
 
     ListadoFacturasGenerico(
         facturas = facturasRecibidas,
         facturaViewModel = facturaViewModel,
-        emptyMessage = "No hay facturas recibidas disponibles"
+        emptyMessage = "No hay facturas recibidas disponibles",
+        navController = navController
     )
 }
 
 @Composable
-fun ListadoFacturasEmitidas(facturaViewModel: FacturaViewModel) {
+fun ListadoFacturasEmitidas(facturaViewModel: FacturaViewModel,navController: NavHostController) {
     val facturas by facturaViewModel.facturas.collectAsState()
     val facturasEmitidas = facturas.filter { it.emitida }
 
     ListadoFacturasGenerico(
         facturas = facturasEmitidas,
         facturaViewModel = facturaViewModel,
-        emptyMessage = "No hay facturas emitidas disponibles"
+        emptyMessage = "No hay facturas emitidas disponibles",
+        navController = navController
     )
 }
 @Composable
 fun ListadoFacturasGenerico(
     facturas: List<Factura>,
     facturaViewModel: FacturaViewModel,
-    emptyMessage: String
+    emptyMessage: String,
+    navController: NavHostController
 ) {
     if (facturas.isEmpty()) {
         Text(emptyMessage, Modifier.padding(16.dp))
@@ -129,7 +133,9 @@ fun ListadoFacturasGenerico(
                 FacturaItem(
                     factura,
                     facturaViewModel = facturaViewModel,
-                    onEdit = { /* Lógica para editar */ },
+                    onEdit = { numeroFactura ->
+                        navController.navigate("pantallaEditarFactura/$numeroFactura")
+                    },
                     onDelete = { facturaViewModel.eliminarFactura(factura) }
                 )
             }
@@ -138,7 +144,7 @@ fun ListadoFacturasGenerico(
 }
 
 @Composable
-fun ListadoFacturas(facturaViewModel: FacturaViewModel) {
+fun ListadoFacturas(facturaViewModel: FacturaViewModel,navController:NavHostController) {
     val facturas by facturaViewModel.facturas.collectAsState()
 
     if (facturas.isEmpty()) {
@@ -153,7 +159,9 @@ fun ListadoFacturas(facturaViewModel: FacturaViewModel) {
                 FacturaItem(
                     factura,
                     facturaViewModel = facturaViewModel,
-                    onEdit = { /* Lógica para editar */ },
+                    onEdit = { numeroFactura ->
+                        navController.navigate("pantallaEditarFactura/$numeroFactura")
+                    },
                     onDelete = { facturaViewModel.eliminarFactura(factura) }
                 )
             }
@@ -165,7 +173,7 @@ fun ListadoFacturas(facturaViewModel: FacturaViewModel) {
 fun FacturaItem(
     factura: Factura,
     facturaViewModel: FacturaViewModel,
-    onEdit: () -> Unit,
+    onEdit: (Int) -> Unit,
     onDelete: () -> Unit
 ) {
     val porcentajeIva = factura.IVA * 100 / factura.baseImponible
@@ -239,7 +247,7 @@ fun FacturaItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Button(onClick = onEdit) {
+                    Button(onClick = { onEdit(factura.nFactura) }) {
                         Text("Editar")
                     }
                     Button(

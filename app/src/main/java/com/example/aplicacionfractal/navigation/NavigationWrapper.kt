@@ -42,9 +42,9 @@ fun NavigationWrapper(navHostController: NavHostController) {
         }
         composable(
             "pantallaEditarFactura/{numeroFactura}",
-            arguments = listOf(navArgument("numeroFactura") { type = NavType.IntType })
+            arguments = listOf(navArgument("numeroFactura") { type = NavType.StringType })
         ) { backStackEntry ->
-            val numeroFactura = backStackEntry.arguments?.getInt("numeroFactura") ?: 0
+            val numeroFactura = backStackEntry.arguments?.getString("numeroFactura") ?: ""
             PantallaEditarFactura(
                 navController = navHostController,
                 numeroFactura = numeroFactura

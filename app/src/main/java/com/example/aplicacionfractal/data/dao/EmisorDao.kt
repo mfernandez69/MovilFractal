@@ -35,4 +35,9 @@ class EmisorDao(private val db: FirebaseFirestore) {
     fun obtenerEmisorId(id: String): DocumentReference? {
         return emisoresRef.document(id)
     }
+    suspend fun agregarOActualizarEmisor(emisor: Emisor): DocumentReference {
+        val docRef = emisoresRef.document(emisor.nif)
+        docRef.set(emisor).await()
+        return docRef
+    }
 }

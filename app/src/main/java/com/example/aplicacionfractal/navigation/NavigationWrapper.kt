@@ -14,6 +14,9 @@ import com.example.aplicacionfractal.screens.PantallaPrincipal
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.aplicacionfractal.screens.PantallaEditarFactura
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
@@ -37,5 +40,16 @@ fun NavigationWrapper(navHostController: NavHostController) {
                 onSelectedItemChange = { selectedItemIndex = it }
             )
         }
+        composable(
+            "pantallaEditarFactura/{numeroFactura}",
+            arguments = listOf(navArgument("numeroFactura") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val numeroFactura = backStackEntry.arguments?.getInt("numeroFactura") ?: 0
+            PantallaEditarFactura(
+                navController = navHostController,
+                numeroFactura = numeroFactura
+            )
+        }
+
     }
 }

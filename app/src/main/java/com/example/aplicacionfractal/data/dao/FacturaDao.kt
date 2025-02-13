@@ -28,6 +28,23 @@ class FacturaDao(private val db: FirebaseFirestore) {
         val documentSnapshot = facturasRef.document(id).get().await()
         return documentSnapshot.toObject(Factura::class.java)
     }
+    suspend fun obtenerIdPorNfactura(nFactura: Int): String? {
+        // Realiza una consulta para encontrar el documento con el nFactura dado
+        val querySnapshot = facturasRef
+            .whereEqualTo("nFactura", nFactura)
+            .get()
+            .await()
+
+        // Verifica si la consulta devolvió algún documento
+        if (!querySnapshot.isEmpty) {
+            // Obtén el ID del primer documento encontrado
+            return querySnapshot.documents.first().id
+        }
+
+        // Retorna null si no se encuentra ningún documento
+        return null
+    }
+
 
     suspend fun agregarFactura(factura: Factura) {
         facturasRef.add(factura).await()
@@ -79,6 +96,20 @@ class FacturaDao(private val db: FirebaseFirestore) {
         } catch (e: Exception) {
             Log.e("Firestore", "Error al calcular ganancias y pérdidas: ${e.message}")
             return Pair(0.0, 0.0)
+        }
+    }
+
+    suspend fun obtenerFacturaPorNumero(numeroFactura: Int): Factura? {
+        return try {
+            val querySnapshot = facturasRef.whereEqualTo("nFactura", numeroFactura).get().await()
+            if (!querySnapshot.isEmpty) {
+                querySnapshot.documents[0].toObject(Factura::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error al obtener factura por número $numeroFactura: ${e.message}")
+            null
         }
     }
 

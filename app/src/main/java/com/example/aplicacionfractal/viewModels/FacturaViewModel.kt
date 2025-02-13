@@ -13,6 +13,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
 
 class FacturaViewModel : ViewModel() {
@@ -106,7 +107,7 @@ class FacturaViewModel : ViewModel() {
             null
         }
     }
-    suspend fun obtenerFacturaPorNumero(numeroFactura: Int): Factura? {
+    suspend fun obtenerFacturaPorNumero(numeroFactura: String): Factura? {
         return try {
             val factura = facturaDao.obtenerFacturaPorNumero(numeroFactura)
             _facturaActual.value = factura
@@ -143,6 +144,16 @@ class FacturaViewModel : ViewModel() {
             _error.value = "Error actualizando factura: ${e.localizedMessage}"
             Log.e("FacturaVM", "Error al actualizar factura", e)
         }
+    }
+
+    fun generarNumeroFactura(): String{
+        return facturas.value.firstOrNull()?.let { ultimaFactura ->
+            val nFactura = ultimaFactura.nFactura
+            val serieFactura = nFactura.substringBefore("-")
+            val numeroExtraido = nFactura.substringAfter("-").toInt()
+            val numeroNuevo = (numeroExtraido + 1).coerceAtMost(999)
+            "$serieFactura-${numeroNuevo.toString().padStart(3, '0')}"
+        } ?: "2025-001"
     }
 
 }

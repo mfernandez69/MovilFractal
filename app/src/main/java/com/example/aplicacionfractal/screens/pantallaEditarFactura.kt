@@ -1,5 +1,6 @@
 package com.example.aplicacionfractal.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,8 +36,9 @@ import kotlin.math.roundToInt
 @Composable
 fun PantallaEditarFactura(
     navController: NavHostController,
-    numeroFactura: Int
+    numeroFactura: String
 ) {
+//    Log.d("PantallaEditarFactura", "PantallaEditarFactura started with numeroFactura = $numeroFactura")
     val facturaViewModel: FacturaViewModel = viewModel()
     var facturaExistente by remember { mutableStateOf<Factura?>(null) }
     var emisor by remember { mutableStateOf<Emisor?>(null) }
@@ -93,7 +95,7 @@ fun ContentEditView(
     receptorInicial: Receptor?,
     facturaViewModel: FacturaViewModel
 ) {
-    var numFactura by remember { mutableStateOf(factura.nFactura.toString()) }
+    var numFactura by remember { mutableStateOf(factura.nFactura) }
     var baseImponible by remember { mutableStateOf(factura.baseImponible.toString()) }
     var porcentajeIVA by remember { mutableStateOf(((factura.IVA / factura.baseImponible) * 100).roundToInt()) }
     var total by remember { mutableStateOf(factura.total) }
@@ -116,12 +118,21 @@ fun ContentEditView(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = numFactura,
-            onValueChange = { if (it.all { char -> char.isDigit() }) numFactura = it },
-            label = { Text(text = "Número de Factura") },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
+//        OutlinedTextField(
+//            value = numFactura,
+//            onValueChange = { if (it.all { char -> char.isDigit() }) numFactura = it },
+//            label = { Text(text = "Número de Factura") },
+//            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp),
+//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
+//        )
+
+        Text(
+            text = "Numero de factura: $numFactura",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp)
         )
 
         // Campos para Emisor
@@ -217,7 +228,7 @@ fun ContentEditView(
                 val receptorActualizado = Receptor(direccionReceptor, clienteReceptor, cifReceptor)
 
                 val facturaActualizada = factura.copy(
-                    nFactura = numFactura.toInt(),
+                    nFactura = numFactura,
                     baseImponible = baseImponibleDouble,
                     IVA = iva,
                     total = total

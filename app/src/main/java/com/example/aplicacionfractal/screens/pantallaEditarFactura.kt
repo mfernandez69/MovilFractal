@@ -100,6 +100,9 @@ fun ContentEditView(
     var porcentajeIVA by remember { mutableStateOf(((factura.IVA / factura.baseImponible) * 100).roundToInt()) }
     var total by remember { mutableStateOf(factura.total) }
 
+    var emitida by remember { mutableStateOf(factura.emitida) }
+    var recibida by remember { mutableStateOf(!factura.emitida) }
+
     // Emisor
     var empresaEmisor by remember { mutableStateOf(emisorInicial?.empresa ?: "") }
     var nifEmisor by remember { mutableStateOf(emisorInicial?.nif ?: "") }
@@ -134,6 +137,55 @@ fun ContentEditView(
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
         )
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 30.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ){
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = "Emitida"
+                )
+                Checkbox(
+                    checked = emitida,
+                    onCheckedChange = {
+                        emitida = it
+                        recibida = !it
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = "Recibida"
+                )
+                Checkbox(
+                    checked = recibida,
+                    onCheckedChange = {
+                        emitida = !it
+                        recibida = it
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimario
+                    )
+                )
+            }
+
+        }
 
         // Campos para Emisor
         Text(text = "Datos del Emisor", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(horizontal = 30.dp))
@@ -230,6 +282,7 @@ fun ContentEditView(
                 val facturaActualizada = factura.copy(
                     nFactura = numFactura,
                     baseImponible = baseImponibleDouble,
+                    emitida = emitida,
                     IVA = iva,
                     total = total
                 )

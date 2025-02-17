@@ -1,6 +1,6 @@
 package com.example.aplicacionfractal.screens
 
-import android.util.Log
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,6 +25,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.exoplayer.offline.Download
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.aplicacionfractal.data.models.Emisor
@@ -54,6 +59,9 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+import androidx.compose.material.icons.filled.FileDownload
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -184,7 +192,6 @@ fun FacturaItem(
     var emisor by remember { mutableStateOf<Emisor?>(null) }
     var receptor by remember { mutableStateOf<Receptor?>(null) }
 
-    // Configuración para formatear números con coma como separador decimal
     val decimalFormatSymbols = DecimalFormatSymbols(Locale.getDefault()).apply {
         decimalSeparator = ','
     }
@@ -213,11 +220,30 @@ fun FacturaItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Factura Nº ${factura.nFactura}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Factura Nº ${factura.nFactura}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(onClick = {
+                    // Acción al hacer clic en el icono de descarga
+                    println("Descargando Factura ${factura.nFactura}")
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.FileDownload, // Icono de descarga
+                        contentDescription = "Descargar Factura"
+                    )
+                }
+            }
+
+
+
             Text(text = "Fecha: ${factura.fechaEmision?.toDate()?.let { dateFormat.format(it) } ?: "No disponible"}")
             Text(text = "Base Imponible: ${decimalFormat.format(factura.baseImponible)}€")
             Text(text = "IVA (${porcentajeIva}%): ${decimalFormat.format(factura.baseImponible * porcentajeIva / 100)}€")
@@ -248,10 +274,7 @@ fun FacturaItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Button(onClick = {
-//                        Log.d("FacturaItem", "Clicked Editar for factura ${factura.nFactura}")
-                        onEdit(factura.nFactura)
-                    }) {
+                    Button(onClick = { onEdit(factura.nFactura) }) {
                         Text("Editar")
                     }
                     Button(

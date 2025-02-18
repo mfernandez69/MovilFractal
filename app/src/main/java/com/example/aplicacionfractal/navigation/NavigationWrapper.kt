@@ -16,13 +16,21 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.aplicacionfractal.screens.PantallaEditarFactura
+import com.example.aplicacionfractal.screens.PantallaLogin
 import com.example.aplicacionfractal.screens.PantallaPrincipal
+import com.example.aplicacionfractal.screens.PantallaRegister
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NavigationWrapper(navHostController: NavHostController) {
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
-    NavHost(navController = navHostController, startDestination = "pantallaPrincipal") {
+    NavHost(navController = navHostController, startDestination = "pantallaLogin") {
+        composable("pantallaLogin") {
+            PantallaLogin(navController = navHostController)
+        }
+        composable("pantallaRegister") {
+            PantallaRegister(navController = navHostController)
+        }
         composable("pantallaPrincipal") {
             PantallaPrincipal(
                 navController = navHostController,

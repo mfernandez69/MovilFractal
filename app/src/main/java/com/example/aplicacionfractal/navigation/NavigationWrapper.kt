@@ -10,13 +10,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.example.aplicacionfractal.screens.PantallaAddFactura
 import com.example.aplicacionfractal.screens.PantallaGastos
-import com.example.aplicacionfractal.screens.PantallaPrincipal
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.aplicacionfractal.screens.PantallaEditarFactura
+import com.example.aplicacionfractal.screens.PantallaPrincipal
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aplicacionfractal.data.dao.UsuarioDao
 import com.example.aplicacionfractal.data.models.Usuario
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -12,25 +13,35 @@ import kotlinx.coroutines.tasks.await
 class RegisterViewModel(private val usuarioDao: UsuarioDao = UsuarioDao(FirebaseFirestore.getInstance())) : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
 
-    fun register(email: String, password: String, adminKey: String) {
-        viewModelScope.launch {
-            try {
-                val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-                val userId = authResult.user?.uid ?: return@launch
+    suspend fun register(email: String, password: String, adminKey: String): Boolean {
+        val emailFormateado = email.trim()
 
-                val isAdmin = if (adminKey.isNotEmpty()) {
-                    usuarioDao.verificarClaveAdmin(adminKey)
-                } else false
+        return try {
+            val isAdmin = if (adminKey.isNotEmpty()) {
+                usuarioDao.verificarClaveAdmin(adminKey)
+            } else false
 
-                val usuario = Usuario(
-                    email = email,
-                    role = if (isAdmin) "admin" else "user"
-                )
-                usuarioDao.agregarUsuario(userId, usuario)
-            } catch (e: Exception) {
-                // Manejar errores de registro
+            if (adminKey.isNotEmpty() && !isAdmin) {
+                // La clave de administrador se proporcionó pero no es válida
+                return false
             }
+
+            val authResult = auth.createUserWithEmailAndPassword(emailFormateado, password).await()
+            val userId = authResult.user?.uid ?: return false
+
+            val usuario = Usuario(
+                email = emailFormateado,
+                role = if (isAdmin) "admin" else "user",
+                createdAt = Timestamp.now()
+            )
+            usuarioDao.agregarUsuario(userId, usuario)
+            true
+        } catch (e: Exception) {
+            // Manejar errores de registro
+            false
         }
     }
+
 }
+
 

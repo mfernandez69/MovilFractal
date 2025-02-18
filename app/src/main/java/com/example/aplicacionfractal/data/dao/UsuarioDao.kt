@@ -21,7 +21,8 @@ class UsuarioDao(private val db: FirebaseFirestore) {
     }
 
     suspend fun verificarClaveAdmin(clave: String): Boolean {
-        val documentSnapshot = db.collection("AdminKeys").document(clave).get().await()
-        return documentSnapshot.exists()
+        val documentSnapshot = db.collection("AdminKeys").whereEqualTo("clave", clave).get().await()
+        return !documentSnapshot.isEmpty
     }
+
 }

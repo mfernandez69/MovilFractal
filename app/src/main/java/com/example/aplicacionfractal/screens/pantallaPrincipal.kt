@@ -1,5 +1,20 @@
 package com.example.aplicacionfractal.screens
 
+
+import android.content.ContentValues
+import android.content.Context
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
+import com.itextpdf.kernel.colors.DeviceRgb
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.borders.Border
+import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.property.TextAlignment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,19 +37,13 @@ import androidx.navigation.NavHostController
 import com.example.aplicacionfractal.data.models.Factura
 import com.example.aplicacionfractal.utils.MenuPrincipal
 import com.example.aplicacionfractal.viewModels.FacturaViewModel
-import android.widget.Toast
-import android.content.Context
-import android.os.Environment
 import androidx.compose.ui.platform.LocalContext
 import com.example.aplicacionfractal.data.models.Emisor
 import com.example.aplicacionfractal.data.models.Receptor
 import com.example.aplicacionfractal.utils.TabMultiple
-import com.itextpdf.text.Paragraph
-import android.content.ContentValues
 import android.os.Build
-import android.provider.MediaStore
 import androidx.annotation.RequiresApi
-import com.itextpdf.text.*
+import com.google.firebase.firestore.FirebaseFirestore
 import com.itextpdf.layout.element.*
 
 
@@ -218,7 +227,7 @@ fun FacturaItem(
 
             Text(text = "Fecha: ${factura.fechaEmision}")
             Text(text = "Base Imponible: ${factura.baseImponible}€")
-            Text(text = "IVA (${porcentajeIva}%): ${factura.baseImponible * porcentajeIva / 100}€")
+            Text(text = "IVA (${porcentajeIva}%): ${factura.IVA}€")
             Text(text = "Total: ${factura.total}€", fontWeight = FontWeight.Bold)
 
             if (expanded) {
@@ -285,41 +294,157 @@ fun FacturaItem(
         )
     }
 }
+fun obtenerEmisorYReceptor(
+    context: Context,
+    factura: Factura,
+    onComplete: (Emisor?, Receptor?) -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
 
-fun exportToPDF(context: Context, factura: Factura) {
-    val document = Document()
-    val contentResolver = context.contentResolver
+    // Referencias a los documentos
+    val emisorRef = factura.emisorId
+    val receptorRef = factura.receptorId
 
-    // Creamos los valores para el PDF en MediaStore
-    val contentValues = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, "Factura_${factura.nFactura}.pdf")
-        put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
-        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS) // ✅ Correcto para Android 10+
+    var emisor: Emisor? = null
+    var receptor: Receptor? = null
+
+    // Contador de procesos terminados
+    var procesosCompletados = 0
+
+    fun verificarFinalizacion() {
+        procesosCompletados++
+        if (procesosCompletados == 2) {
+            onComplete(emisor, receptor)
+        }
     }
 
-    // Insertamos el archivo en MediaStore y obtenemos su URI
-    val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-
-    if (uri == null) {
-        Toast.makeText(context, "No se pudo crear el archivo PDF", Toast.LENGTH_SHORT).show()
-        return
+    // Obtener Emisor
+    emisorRef?.get()?.addOnSuccessListener { doc ->
+        if (doc.exists()) {
+            emisor = doc.toObject(Emisor::class.java)
+        }
+        verificarFinalizacion()
+    }?.addOnFailureListener {
+        Toast.makeText(context, "Error al obtener emisor", Toast.LENGTH_SHORT).show()
+        verificarFinalizacion()
     }
 
-    try {
-        contentResolver.openOutputStream(uri)?.use { outputStream ->
-            val pdfWriter = com.itextpdf.text.pdf.PdfWriter.getInstance(document, outputStream)
-            document.open()
-            document.add(Paragraph("Factura Nº: ${factura.nFactura}"))
-            document.add(Paragraph("Fecha: ${factura.fechaEmision}"))
-            document.add(Paragraph("Base Imponible: ${factura.baseImponible}"))
-            document.add(Paragraph("IVA: ${factura.IVA}%"))
-            document.add(Paragraph("Total: ${factura.total}"))
-            document.close()
+    // Obtener Receptor
+    receptorRef?.get()?.addOnSuccessListener { doc ->
+        if (doc.exists()) {
+            receptor = doc.toObject(Receptor::class.java)
+        }
+        verificarFinalizacion()
+    }?.addOnFailureListener {
+        Toast.makeText(context, "Error al obtener receptor", Toast.LENGTH_SHORT).show()
+        verificarFinalizacion()
+    }
 
-            Toast.makeText(context, "Factura exportada en Descargas", Toast.LENGTH_SHORT).show()
-        } ?: throw Exception("OutputStream es nulo")
-    } catch (e: Exception) {
-        Toast.makeText(context, "Error al exportar la factura", Toast.LENGTH_SHORT).show()
-        e.printStackTrace()
+    // Si ambos son nulos desde el inicio, se llama onComplete
+    if (emisorRef == null && receptorRef == null) {
+        onComplete(null, null)
     }
 }
+
+fun exportToPDF(context: Context, factura: Factura) {
+    obtenerEmisorYReceptor(context, factura) { emisor, receptor ->
+        val contentResolver = context.contentResolver
+
+        val porcentajeIva = factura.IVA * 100 / factura.baseImponible
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "Factura_${factura.nFactura}.pdf")
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        }
+
+        val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        if (uri == null) {
+            Toast.makeText(context, "No se pudo crear el archivo PDF", Toast.LENGTH_SHORT).show()
+            return@obtenerEmisorYReceptor
+        }
+
+        try {
+            contentResolver.openOutputStream(uri)?.use { outputStream ->
+                val writer = PdfWriter(outputStream)
+                val pdfDocument = PdfDocument(writer)
+                val document = Document(pdfDocument)
+
+                val fontBold = com.itextpdf.kernel.font.PdfFontFactory.createFont(com.itextpdf.io.font.constants.StandardFonts.HELVETICA_BOLD)
+                val fontNormal = com.itextpdf.kernel.font.PdfFontFactory.createFont(com.itextpdf.io.font.constants.StandardFonts.HELVETICA)
+
+                // Título de la factura
+                val title = Paragraph("Factura Nº: ${factura.nFactura}")
+                    .setFont(fontBold)
+                    .setFontSize(22f)
+                    .setFontColor(DeviceRgb(0, 0, 128))
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(20f)
+
+                document.add(title)
+
+                // Tabla de datos del Emisor
+                //document.add(Paragraph("Datos del Emisor").setFont(fontBold).setFontSize(14f).setMarginBottom(5f))
+//                val tableEmisor = Table(floatArrayOf(1f, 2f)).useAllAvailableWidth()
+//                emisor?.let {
+//                    addTableRow(tableEmisor, "Empresa:", it.empresa, fontBold, fontNormal)
+//                    addTableRow(tableEmisor, "NIF:", it.nif, fontBold, fontNormal)
+//                    addTableRow(tableEmisor, "Dirección:", it.direccionEmisor, fontBold, fontNormal)
+//                }
+//                document.add(tableEmisor.setMarginBottom(15f))
+
+                // Tabla de datos del Receptor
+                //document.add(Paragraph("Datos del Receptor").setFont(fontBold).setFontSize(14f).setMarginBottom(5f))
+//                val tableReceptor = Table(floatArrayOf(1f, 2f)).useAllAvailableWidth()
+//                receptor?.let {
+//                    addTableRow(tableReceptor, "Cliente:", it.cliente, fontBold, fontNormal)
+//                    addTableRow(tableReceptor, "CIF:", it.cif, fontBold, fontNormal)
+//                    addTableRow(tableReceptor, "Dirección:", it.direccionReceptor, fontBold, fontNormal)
+//                }
+//                document.add(tableReceptor.setMarginBottom(15f))
+
+                // Tabla de datos de la Factura
+                //document.add(Paragraph("Datos de la Factura").setFont(fontBold).setFontSize(14f).setMarginBottom(5f))
+                val tableFactura = Table(floatArrayOf(1f, 2f)).useAllAvailableWidth()
+                emisor?.let {
+                    addTableHeader(tableFactura, "Datos del Emisor", fontBold, fontNormal)
+                    addTableRow(tableFactura, "Empresa:", it.empresa, fontBold, fontNormal)
+                    addTableRow(tableFactura, "NIF:", it.nif, fontBold, fontNormal)
+                    addTableRow(tableFactura, "Dirección:", it.direccionEmisor, fontBold, fontNormal)
+                }
+                receptor?.let {
+                    addTableHeader(tableFactura, "Datos del Receptor", fontBold, fontNormal)
+                    addTableRow(tableFactura, "Cliente:", it.cliente, fontBold, fontNormal)
+                    addTableRow(tableFactura, "CIF:", it.cif, fontBold, fontNormal)
+                    addTableRow(tableFactura, "Dirección:", it.direccionReceptor, fontBold, fontNormal)
+                }
+                addTableHeader(tableFactura, "Datos de la Factura", fontBold, fontNormal)
+                addTableRow(tableFactura, "Base Imponible:", "${factura.baseImponible} €", fontBold, fontNormal)
+                addTableRow(tableFactura, "IVA (${porcentajeIva}%):", "${factura.IVA}€", fontBold, fontNormal)
+                addTableRow(tableFactura, "Total:", "${factura.total} €", fontBold, fontNormal)
+                document.add(tableFactura.setMarginBottom(15f))
+
+                document.close()
+
+                Toast.makeText(context, "Factura exportada en Descargas", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error al exportar la factura", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+}
+
+
+fun addTableRow(table: Table, label: String, value: String, fontBold: com.itextpdf.kernel.font.PdfFont, fontNormal: com.itextpdf.kernel.font.PdfFont) {
+    table.addCell(Cell().add(Paragraph(label).setFont(fontBold).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER))
+    table.addCell(Cell().add(Paragraph(value).setFont(fontNormal).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER))
+}
+
+fun addTableHeader(table: Table, label: String, fontBold: com.itextpdf.kernel.font.PdfFont, fontNormal: com.itextpdf.kernel.font.PdfFont) {
+    table.addCell(Cell().add(Paragraph(label).setFont(fontBold).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER).setFontSize(14f))
+    table.addCell(Cell().add(Paragraph("").setFont(fontBold).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER).setFontSize(14f))
+}
+
+
+

@@ -227,7 +227,7 @@ fun FacturaItem(
 
             Text(text = "Fecha: ${factura.fechaEmision}")
             Text(text = "Base Imponible: ${factura.baseImponible}€")
-            Text(text = "IVA (${porcentajeIva}%): ${factura.baseImponible * porcentajeIva / 100}€")
+            Text(text = "IVA (${porcentajeIva}%): ${factura.IVA}€")
             Text(text = "Total: ${factura.total}€", fontWeight = FontWeight.Bold)
 
             if (expanded) {
@@ -350,6 +350,8 @@ fun exportToPDF(context: Context, factura: Factura) {
     obtenerEmisorYReceptor(context, factura) { emisor, receptor ->
         val contentResolver = context.contentResolver
 
+        val porcentajeIva = factura.IVA * 100 / factura.baseImponible
+
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, "Factura_${factura.nFactura}.pdf")
             put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
@@ -418,7 +420,7 @@ fun exportToPDF(context: Context, factura: Factura) {
                 }
                 addTableHeader(tableFactura, "Datos de la Factura", fontBold, fontNormal)
                 addTableRow(tableFactura, "Base Imponible:", "${factura.baseImponible} €", fontBold, fontNormal)
-                addTableRow(tableFactura, "IVA:", "${factura.IVA}%", fontBold, fontNormal)
+                addTableRow(tableFactura, "IVA (${porcentajeIva}%):", "${factura.IVA}€", fontBold, fontNormal)
                 addTableRow(tableFactura, "Total:", "${factura.total} €", fontBold, fontNormal)
                 document.add(tableFactura.setMarginBottom(15f))
 

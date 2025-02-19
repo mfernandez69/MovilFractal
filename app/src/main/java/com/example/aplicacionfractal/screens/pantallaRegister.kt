@@ -46,8 +46,8 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .shadow(elevation = 12.dp), // Sombra más pronunciada
+                    .shadow(4.dp, shape = RoundedCornerShape(8.dp))
+                    .background(Color.Transparent),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(

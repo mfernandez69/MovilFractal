@@ -8,14 +8,19 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class LoginViewModel( private val usuarioDao: UsuarioDao = UsuarioDao(FirebaseFirestore.getInstance())) : ViewModel() {
+class LoginViewModel(private val usuarioDao: UsuarioDao = UsuarioDao(FirebaseFirestore.getInstance())) : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
-    fun login(email: String, password: String) {
-        viewModelScope.launch {
-            try {
-                auth.signInWithEmailAndPassword(email, password).await()
-            } catch (e: Exception) {
-            }
+
+    suspend fun login(email: String, password: String): Boolean {
+        return try {
+            val authResult = auth.signInWithEmailAndPassword(email, password).await()
+            val userId = authResult.user?.uid ?: return false
+
+            val usuario = usuarioDao.obtenerUsuario(userId)
+            usuario?.role == "admin"
+        } catch (e: Exception) {
+            false
         }
     }
 }
+

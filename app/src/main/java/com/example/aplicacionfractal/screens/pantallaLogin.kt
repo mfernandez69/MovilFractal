@@ -18,15 +18,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.aplicacionfractal.viewModels.LoginViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
+    var isLoading by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -42,8 +44,8 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .shadow(elevation = 12.dp), // Sombra más pronunciada
+                    .shadow(4.dp, shape = RoundedCornerShape(8.dp))
+                    .background(Color.Transparent),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(
@@ -85,12 +87,28 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
-                        onClick = { viewModel.login(email, password) },
+                        onClick = {
+                            isLoading = true
+                            viewModel.viewModelScope.launch {
+                                val loginSuccess = viewModel.login(email, password)
+                                isLoading = false
+                                if (loginSuccess) {
+                                    navController.navigate("pantallaPrincipal")
+                                } else {
+                                    // Mostrar un mensaje de error
+                                }
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading,
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6)),
-                        shape = RoundedCornerShape(8.dp) // Bordes redondeados en el botón
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Sign in", color = Color.White)
+                        if (isLoading) {
+                            CircularProgressIndicator(color = Color.White)
+                        } else {
+                            Text("Sign in", color = Color.White)
+                        }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {

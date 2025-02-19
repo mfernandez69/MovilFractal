@@ -28,6 +28,8 @@ import kotlinx.coroutines.launch
 fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
     var isLoading by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -95,7 +97,7 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                                 if (loginSuccess) {
                                     navController.navigate("pantallaPrincipal")
                                 } else {
-                                    // Mostrar un mensaje de error
+                                    errorMessage = "Email o contraseña incorrectos"
                                 }
                             }
                         },
@@ -110,6 +112,15 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                             Text("Iniciar sesión", color = Color.White)
                         }
                     }
+                    if (errorMessage.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = errorMessage,
+                            color = Color.Red,
+                            fontSize = 14.sp
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
                         modifier = Modifier.align(Alignment.CenterHorizontally),

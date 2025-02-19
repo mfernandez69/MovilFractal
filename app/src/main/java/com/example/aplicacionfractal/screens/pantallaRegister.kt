@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.example.aplicacionfractal.viewModels.RegisterResult
 import kotlinx.coroutines.launch
 
 @Composable
@@ -30,6 +31,8 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var adminKey by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
     var isLoading by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -99,13 +102,18 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                             if (password == confirmPassword) {
                                 isLoading = true
                                 viewModel.viewModelScope.launch {
-                                    val success = viewModel.register(email, password, adminKey)
-                                    isLoading = false
-                                    if (success) {
-                                        navController.navigate("pantallaPrincipal")
-                                    } else {
-                                        // Mostrar un mensaje de error
+                                    when (val result = viewModel.register(email, password, adminKey)) {
+                                        is RegisterResult.Success -> {
+                                            navController.navigate("pantallaPrincipal")
+                                        }
+                                        is RegisterResult.InvalidAdminKey -> {
+                                            errorMessage = "La clave de administrador es incorrecta."
+                                        }
+                                        is RegisterResult.OtherError -> {
+                                            errorMessage = result.message
+                                        }
                                     }
+                                    isLoading = false
                                 }
                             }
                         },
@@ -117,9 +125,20 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                         if (isLoading) {
                             CircularProgressIndicator(color = Color.White)
                         } else {
-                            Text("Create an account", color = Color.White)
+                            Text("Registrarse", color = Color.White)
                         }
                     }
+
+                    if (errorMessage.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = errorMessage,
+                            color = Color.Red,
+                            fontSize = 14.sp
+                        )
+                    }
+
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Row(

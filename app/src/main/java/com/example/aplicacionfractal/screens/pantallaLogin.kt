@@ -54,7 +54,7 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "Sign in to your account",
+                        text = "Iniciar sesión en Fractal",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1F2937)
@@ -63,7 +63,7 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Your email") },
+                        label = { Text("Correo") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp) // Bordes redondeados en el TextField
                     )
@@ -71,7 +71,7 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password") },
+                        label = { Text("Contraseña") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp) // Bordes redondeados en el TextField
                     )
@@ -82,7 +82,7 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(onClick = { /* Implementar lógica de olvidó contraseña */ }) {
-                            Text("Forgot password?", color = Color(0xFF3B82F6))
+                            Text("¿Contraseña olvidada?", color = Color(0xFF3B82F6))
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
@@ -107,16 +107,24 @@ fun PantallaLogin(navController: NavHostController, viewModel: LoginViewModel = 
                         if (isLoading) {
                             CircularProgressIndicator(color = Color.White)
                         } else {
-                            Text("Sign in", color = Color.White)
+                            Text("Iniciar sesión", color = Color.White)
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                        Text("Don't have an account yet?", color = Color(0xFF6B7280))
-                        TextButton(onClick = { navController.navigate("pantallaRegister") }) {
-                            Text("Sign up", color = Color(0xFF3B82F6))
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically // Alinea verticalmente los elementos
+                    ) {
+                        Text("¿No tienes cuenta?", color = Color(0xFF6B7280))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        TextButton(
+                            onClick = { navController.navigate("pantallaRegister") },
+                            contentPadding = PaddingValues(0.dp) // Reduce el padding interno del botón
+                        ) {
+                            Text("Registrarse", color = Color(0xFF3B82F6))
                         }
                     }
+
                 }
             }
         }

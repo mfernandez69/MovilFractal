@@ -56,7 +56,7 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "Create an account",
+                        text = "Crear una cuenta",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1F2937)
@@ -65,7 +65,7 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Your email") },
+                        label = { Text("Correo") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp) // Bordes redondeados en el TextField
                     )
@@ -73,7 +73,7 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password") },
+                        label = { Text("Contraseña") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp) // Bordes redondeados en el TextField
                     )
@@ -81,7 +81,7 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm password") },
+                        label = { Text("Confirmar contraseña") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp) // Bordes redondeados en el TextField
                     )
@@ -89,7 +89,7 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                     OutlinedTextField(
                         value = adminKey,
                         onValueChange = { adminKey = it },
-                        label = { Text("Clave") },
+                        label = { Text("Clave admin") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp) // Bordes redondeados en el TextField
                     )
@@ -121,12 +121,21 @@ fun PantallaRegister(navController: NavHostController, viewModel: RegisterViewMo
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                        Text("Already have an account?", color = Color(0xFF6B7280))
-                        TextButton(onClick = { navController.navigate("pantallaLogin") }) {
-                            Text("Login here", color = Color(0xFF3B82F6))
+
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically // Alinea verticalmente los elementos
+                    ) {
+                        Text("¿Ya tienes una cuenta?", color = Color(0xFF6B7280))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        TextButton(
+                            onClick = { navController.navigate("pantallaLogin") },
+                            contentPadding = PaddingValues(0.dp) // Reduce el padding interno del botón
+                        ) {
+                            Text("Inicia sesión", color = Color(0xFF3B82F6))
                         }
                     }
+
                 }
             }
         }

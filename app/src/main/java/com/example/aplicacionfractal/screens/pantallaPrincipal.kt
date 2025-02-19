@@ -1,42 +1,30 @@
 package com.example.aplicacionfractal.screens
 
 
+import android.content.ContentValues
+import android.content.Context
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
+import com.itextpdf.kernel.colors.DeviceRgb
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.borders.Border
+import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.property.TextAlignment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -45,22 +33,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.media3.exoplayer.offline.Download
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.aplicacionfractal.data.models.Emisor
 import com.example.aplicacionfractal.data.models.Factura
-import com.example.aplicacionfractal.data.models.Receptor
-import com.example.aplicacionfractal.ui.theme.ColorPrimario
 import com.example.aplicacionfractal.utils.MenuPrincipal
-import com.example.aplicacionfractal.utils.TabMultiple
 import com.example.aplicacionfractal.viewModels.FacturaViewModel
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.text.SimpleDateFormat
-import java.util.Locale
-
-import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.ui.platform.LocalContext
+import com.example.aplicacionfractal.data.models.Emisor
+import com.example.aplicacionfractal.data.models.Receptor
+import com.example.aplicacionfractal.utils.TabMultiple
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.google.firebase.firestore.FirebaseFirestore
+import com.itextpdf.layout.element.*
 
 
 
@@ -123,6 +107,7 @@ fun ListadoFacturasEmitidas(facturaViewModel: FacturaViewModel,navController: Na
         navController = navController
     )
 }
+
 @Composable
 fun ListadoFacturasGenerico(
     facturas: List<Factura>,
@@ -152,8 +137,9 @@ fun ListadoFacturasGenerico(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun ListadoFacturas(facturaViewModel: FacturaViewModel,navController:NavHostController) {
+fun ListadoFacturas(facturaViewModel: FacturaViewModel, navController: NavHostController) {
     val facturas by facturaViewModel.facturas.collectAsState()
 
     if (facturas.isEmpty()) {
@@ -178,6 +164,7 @@ fun ListadoFacturas(facturaViewModel: FacturaViewModel,navController:NavHostCont
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun FacturaItem(
     factura: Factura,
@@ -186,16 +173,11 @@ fun FacturaItem(
     onDelete: () -> Unit
 ) {
     val porcentajeIva = factura.IVA * 100 / factura.baseImponible
-    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    val context = LocalContext.current  // Obtener contexto
     var expanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var emisor by remember { mutableStateOf<Emisor?>(null) }
     var receptor by remember { mutableStateOf<Receptor?>(null) }
-
-    val decimalFormatSymbols = DecimalFormatSymbols(Locale.getDefault()).apply {
-        decimalSeparator = ','
-    }
-    val decimalFormat = DecimalFormat("#,##0.00", decimalFormatSymbols)
 
     LaunchedEffect(factura, expanded) {
         if (expanded && (emisor == null || receptor == null)) {
@@ -232,8 +214,9 @@ fun FacturaItem(
                 )
 
                 IconButton(onClick = {
-                    // Acción al hacer clic en el icono de descarga
                     println("Descargando Factura ${factura.nFactura}")
+                    // Llama a la función que maneja la exportación a PDF
+                    exportToPDF(context, factura)
                 }) {
                     Icon(
                         imageVector = Icons.Filled.FileDownload, // Icono de descarga
@@ -242,16 +225,15 @@ fun FacturaItem(
                 }
             }
 
-
-
-            Text(text = "Fecha: ${factura.fechaEmision?.toDate()?.let { dateFormat.format(it) } ?: "No disponible"}")
-            Text(text = "Base Imponible: ${decimalFormat.format(factura.baseImponible)}€")
-            Text(text = "IVA (${porcentajeIva}%): ${decimalFormat.format(factura.baseImponible * porcentajeIva / 100)}€")
-            Text(text = "Total: ${decimalFormat.format(factura.total)}€", fontWeight = FontWeight.Bold)
+            Text(text = "Fecha: ${factura.fechaEmision}")
+            Text(text = "Base Imponible: ${factura.baseImponible}€")
+            Text(text = "IVA (${porcentajeIva}%): ${factura.IVA}€")
+            Text(text = "Total: ${factura.total}€", fontWeight = FontWeight.Bold)
 
             if (expanded) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Detalles de la Factura", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 emisor?.let { emisor ->
@@ -312,3 +294,157 @@ fun FacturaItem(
         )
     }
 }
+fun obtenerEmisorYReceptor(
+    context: Context,
+    factura: Factura,
+    onComplete: (Emisor?, Receptor?) -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+
+    // Referencias a los documentos
+    val emisorRef = factura.emisorId
+    val receptorRef = factura.receptorId
+
+    var emisor: Emisor? = null
+    var receptor: Receptor? = null
+
+    // Contador de procesos terminados
+    var procesosCompletados = 0
+
+    fun verificarFinalizacion() {
+        procesosCompletados++
+        if (procesosCompletados == 2) {
+            onComplete(emisor, receptor)
+        }
+    }
+
+    // Obtener Emisor
+    emisorRef?.get()?.addOnSuccessListener { doc ->
+        if (doc.exists()) {
+            emisor = doc.toObject(Emisor::class.java)
+        }
+        verificarFinalizacion()
+    }?.addOnFailureListener {
+        Toast.makeText(context, "Error al obtener emisor", Toast.LENGTH_SHORT).show()
+        verificarFinalizacion()
+    }
+
+    // Obtener Receptor
+    receptorRef?.get()?.addOnSuccessListener { doc ->
+        if (doc.exists()) {
+            receptor = doc.toObject(Receptor::class.java)
+        }
+        verificarFinalizacion()
+    }?.addOnFailureListener {
+        Toast.makeText(context, "Error al obtener receptor", Toast.LENGTH_SHORT).show()
+        verificarFinalizacion()
+    }
+
+    // Si ambos son nulos desde el inicio, se llama onComplete
+    if (emisorRef == null && receptorRef == null) {
+        onComplete(null, null)
+    }
+}
+
+fun exportToPDF(context: Context, factura: Factura) {
+    obtenerEmisorYReceptor(context, factura) { emisor, receptor ->
+        val contentResolver = context.contentResolver
+
+        val porcentajeIva = factura.IVA * 100 / factura.baseImponible
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "Factura_${factura.nFactura}.pdf")
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        }
+
+        val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        if (uri == null) {
+            Toast.makeText(context, "No se pudo crear el archivo PDF", Toast.LENGTH_SHORT).show()
+            return@obtenerEmisorYReceptor
+        }
+
+        try {
+            contentResolver.openOutputStream(uri)?.use { outputStream ->
+                val writer = PdfWriter(outputStream)
+                val pdfDocument = PdfDocument(writer)
+                val document = Document(pdfDocument)
+
+                val fontBold = com.itextpdf.kernel.font.PdfFontFactory.createFont(com.itextpdf.io.font.constants.StandardFonts.HELVETICA_BOLD)
+                val fontNormal = com.itextpdf.kernel.font.PdfFontFactory.createFont(com.itextpdf.io.font.constants.StandardFonts.HELVETICA)
+
+                // Título de la factura
+                val title = Paragraph("Factura Nº: ${factura.nFactura}")
+                    .setFont(fontBold)
+                    .setFontSize(22f)
+                    .setFontColor(DeviceRgb(0, 0, 128))
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(20f)
+
+                document.add(title)
+
+                // Tabla de datos del Emisor
+                //document.add(Paragraph("Datos del Emisor").setFont(fontBold).setFontSize(14f).setMarginBottom(5f))
+//                val tableEmisor = Table(floatArrayOf(1f, 2f)).useAllAvailableWidth()
+//                emisor?.let {
+//                    addTableRow(tableEmisor, "Empresa:", it.empresa, fontBold, fontNormal)
+//                    addTableRow(tableEmisor, "NIF:", it.nif, fontBold, fontNormal)
+//                    addTableRow(tableEmisor, "Dirección:", it.direccionEmisor, fontBold, fontNormal)
+//                }
+//                document.add(tableEmisor.setMarginBottom(15f))
+
+                // Tabla de datos del Receptor
+                //document.add(Paragraph("Datos del Receptor").setFont(fontBold).setFontSize(14f).setMarginBottom(5f))
+//                val tableReceptor = Table(floatArrayOf(1f, 2f)).useAllAvailableWidth()
+//                receptor?.let {
+//                    addTableRow(tableReceptor, "Cliente:", it.cliente, fontBold, fontNormal)
+//                    addTableRow(tableReceptor, "CIF:", it.cif, fontBold, fontNormal)
+//                    addTableRow(tableReceptor, "Dirección:", it.direccionReceptor, fontBold, fontNormal)
+//                }
+//                document.add(tableReceptor.setMarginBottom(15f))
+
+                // Tabla de datos de la Factura
+                //document.add(Paragraph("Datos de la Factura").setFont(fontBold).setFontSize(14f).setMarginBottom(5f))
+                val tableFactura = Table(floatArrayOf(1f, 2f)).useAllAvailableWidth()
+                emisor?.let {
+                    addTableHeader(tableFactura, "Datos del Emisor", fontBold, fontNormal)
+                    addTableRow(tableFactura, "Empresa:", it.empresa, fontBold, fontNormal)
+                    addTableRow(tableFactura, "NIF:", it.nif, fontBold, fontNormal)
+                    addTableRow(tableFactura, "Dirección:", it.direccionEmisor, fontBold, fontNormal)
+                }
+                receptor?.let {
+                    addTableHeader(tableFactura, "Datos del Receptor", fontBold, fontNormal)
+                    addTableRow(tableFactura, "Cliente:", it.cliente, fontBold, fontNormal)
+                    addTableRow(tableFactura, "CIF:", it.cif, fontBold, fontNormal)
+                    addTableRow(tableFactura, "Dirección:", it.direccionReceptor, fontBold, fontNormal)
+                }
+                addTableHeader(tableFactura, "Datos de la Factura", fontBold, fontNormal)
+                addTableRow(tableFactura, "Base Imponible:", "${factura.baseImponible} €", fontBold, fontNormal)
+                addTableRow(tableFactura, "IVA (${porcentajeIva}%):", "${factura.IVA}€", fontBold, fontNormal)
+                addTableRow(tableFactura, "Total:", "${factura.total} €", fontBold, fontNormal)
+                document.add(tableFactura.setMarginBottom(15f))
+
+                document.close()
+
+                Toast.makeText(context, "Factura exportada en Descargas", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error al exportar la factura", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+}
+
+
+fun addTableRow(table: Table, label: String, value: String, fontBold: com.itextpdf.kernel.font.PdfFont, fontNormal: com.itextpdf.kernel.font.PdfFont) {
+    table.addCell(Cell().add(Paragraph(label).setFont(fontBold).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER))
+    table.addCell(Cell().add(Paragraph(value).setFont(fontNormal).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER))
+}
+
+fun addTableHeader(table: Table, label: String, fontBold: com.itextpdf.kernel.font.PdfFont, fontNormal: com.itextpdf.kernel.font.PdfFont) {
+    table.addCell(Cell().add(Paragraph(label).setFont(fontBold).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER).setFontSize(14f))
+    table.addCell(Cell().add(Paragraph("").setFont(fontBold).setTextAlignment(TextAlignment.LEFT)).setBorder(Border.NO_BORDER).setFontSize(14f))
+}
+
+
+

@@ -295,7 +295,7 @@ fun ContentAddView(
         // PORCENTAJE DE IVA
 
         Text(
-            text = "Porcentaje de iva",
+            text = "Porcentaje de IVA",
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
             modifier = Modifier

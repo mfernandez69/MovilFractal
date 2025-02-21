@@ -57,7 +57,7 @@ fun PantallaGastos(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Graficos") },
+                    title = { Text("Gráficos") },
                 )
             }
         ) { innerPadding ->

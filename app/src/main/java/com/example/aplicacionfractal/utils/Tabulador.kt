@@ -107,7 +107,7 @@ fun TabMultiple(facturaViewModel: FacturaViewModel,navController: NavHostControl
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Todos",
+                    text = "Todas",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold
                 )

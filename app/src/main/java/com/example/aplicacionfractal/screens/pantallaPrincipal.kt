@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import java.text.SimpleDateFormat
+import java.util.Locale
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -173,6 +175,7 @@ fun FacturaItem(
     onDelete: () -> Unit
 ) {
     val porcentajeIva = factura.IVA * 100 / factura.baseImponible
+    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     val context = LocalContext.current  // Obtener contexto
     var expanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -225,7 +228,7 @@ fun FacturaItem(
                 }
             }
 
-            Text(text = "Fecha: ${factura.fechaEmision}")
+            Text(text = "Fecha: ${factura.fechaEmision?.toDate()?.let { dateFormat.format(it) } ?: "No disponible"}")
             Text(text = "Base Imponible: ${factura.baseImponible}€")
             Text(text = "IVA (${porcentajeIva}%): ${factura.IVA}€")
             Text(text = "Total: ${factura.total}€", fontWeight = FontWeight.Bold)

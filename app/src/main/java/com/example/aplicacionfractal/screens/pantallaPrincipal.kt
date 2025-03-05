@@ -46,8 +46,6 @@ import com.example.aplicacionfractal.utils.TabMultiple
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.firebase.firestore.FirebaseFirestore
-import com.itextpdf.layout.element.*
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -49,7 +49,7 @@ fun MenuPrincipal(
     )
 
     val context = LocalContext.current
-    val toast = Toast.makeText(context, "Función no implementada", Toast.LENGTH_LONG)
+    val toast = Toast.makeText(context, "Implementación futura", Toast.LENGTH_LONG)
 
     Scaffold(
         bottomBar = {

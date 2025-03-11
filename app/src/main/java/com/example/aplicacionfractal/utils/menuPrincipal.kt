@@ -1,5 +1,6 @@
 package com.example.aplicacionfractal.utils
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aplicacionfractal.ui.theme.ColorPrimario
 import com.example.aplicacionfractal.ui.theme.ColorSecundario
+import androidx.compose.ui.platform.LocalContext
 
 
 @Composable
@@ -45,6 +47,9 @@ fun MenuPrincipal(
         NavigationItem("Clientes", Icons.Filled.DateRange),
         NavigationItem("Hitos", Icons.Filled.Build)
     )
+
+    val context = LocalContext.current
+    val toast = Toast.makeText(context, "Función no implementada", Toast.LENGTH_LONG)
 
     Scaffold(
         bottomBar = {
@@ -71,8 +76,8 @@ fun MenuPrincipal(
                                     when (index) {
                                         0 -> navController.navigate("pantallaPrincipal")
                                         1 -> navController.navigate("pantallaGastos")
-                                        2 -> navController.navigate("pantallaAgenda")
-                                        3 -> navController.navigate("pantallaAlumnos")
+                                        2 -> toast.show()
+                                        3 -> toast.show()
                                     }
                                 },
                                 modifier = Modifier.weight(1f)

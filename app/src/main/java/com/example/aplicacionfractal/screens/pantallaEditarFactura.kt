@@ -191,25 +191,37 @@ fun ContentEditView(
         Text(text = "Datos del Emisor", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(horizontal = 30.dp))
 
         OutlinedTextField(value = nifEmisor, onValueChange = { nifEmisor = it }, label = { Text(text = "NIF del emisor") },
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(bottom = 15.dp),)
 
         OutlinedTextField(value = empresaEmisor, onValueChange = { empresaEmisor = it }, label = { Text(text = "Empresa emisora") },
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(bottom = 15.dp))
 
         OutlinedTextField(value = direccionEmisor, onValueChange = { direccionEmisor = it }, label = { Text(text = "Dirección del emisor") },
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(bottom = 15.dp))
 
         // Campos para Receptor
         Text(text = "Datos del Receptor", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(horizontal = 30.dp))
 
         OutlinedTextField(value = clienteReceptor, onValueChange = { clienteReceptor = it }, label = { Text(text = "Cliente receptor") },
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(bottom = 15.dp))
 
         OutlinedTextField(value = cifReceptor, onValueChange = { cifReceptor = it }, label = { Text(text = "CIF del receptor") },
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(bottom = 15.dp))
 
         OutlinedTextField(value = direccionReceptor, onValueChange = { direccionReceptor = it }, label = { Text(text = "Dirección del receptor") },
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(bottom = 15.dp),)
 
         OutlinedTextField(
             value = baseImponible,

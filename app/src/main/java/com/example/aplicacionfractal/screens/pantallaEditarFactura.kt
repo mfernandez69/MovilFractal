@@ -304,8 +304,13 @@ fun ContentEditView(
                     navController.popBackStack()
                 }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = ColorSecundario, contentColor = Color.White),
-            modifier = Modifier.padding(vertical = 16.dp)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = ColorSecundario,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier
+                .padding(2.dp)
         ) {
             Text(text = "Actualizar Factura", fontSize = 16.sp)
         }

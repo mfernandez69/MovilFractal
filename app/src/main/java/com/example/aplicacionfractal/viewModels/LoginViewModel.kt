@@ -22,5 +22,13 @@ class LoginViewModel(private val usuarioDao: UsuarioDao = UsuarioDao(FirebaseFir
             false
         }
     }
+    fun logout(): Boolean {
+        return try {
+            auth.signOut()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 

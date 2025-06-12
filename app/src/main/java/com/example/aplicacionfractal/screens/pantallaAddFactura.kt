@@ -1,7 +1,6 @@
 package com.example.aplicacionfractal.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,9 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,12 +19,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -110,93 +104,68 @@ fun ContentAddView(
     emisorViewModel: EmisorViewModel,
     receptorViewModel: ReceptorViewModel
 ) {
-    val ivaOptions = listOf(
-        Pair(0, "Exento"),
-        Pair(4, "Superreducido"),
-        Pair(10, "Reducido"),
-        Pair(21, "General")
-    )
-    var porcentajeiva by remember { mutableIntStateOf(21) }
+    val numFactura = facturaViewModel.generarNumeroFactura()
+    var currentStep by remember { mutableIntStateOf(1) }
 
+    // Step 1: Datos generales
     var emitida by remember { mutableStateOf(true) }
     var recibida by remember { mutableStateOf(false) }
-
-    val numFactura = facturaViewModel.generarNumeroFactura()
-
     var baseImponible by remember { mutableStateOf("") }
+    val ivaOptions = listOf(Pair(0, "Exento"), Pair(4, "Superreducido"), Pair(10, "Reducido"), Pair(21, "General"))
+    var porcentajeiva by remember { mutableIntStateOf(21) }
 
-    // Emisor
-    var empresaEmisor by remember { mutableStateOf("") }
+    // Step 2: Emisor
     var nifEmisor by remember { mutableStateOf("") }
+    var empresaEmisor by remember { mutableStateOf("") }
     var direccionEmisor by remember { mutableStateOf("") }
 
-    // Receptor
-    var clienteReceptor by remember { mutableStateOf("") }
+    // Step 3: Receptor
     var cifReceptor by remember { mutableStateOf("") }
+    var clienteReceptor by remember { mutableStateOf("") }
     var direccionReceptor by remember { mutableStateOf("") }
+
+    val isStep1Valid = baseImponible.isNotBlank()
+    val isStep2Valid = nifEmisor.isNotBlank() && empresaEmisor.isNotBlank() && direccionEmisor.isNotBlank()
+    val isStep3Valid = cifReceptor.isNotBlank() && clienteReceptor.isNotBlank() && direccionReceptor.isNotBlank()
 
     Column(
         modifier = Modifier
             .padding(top = 15.dp)
             .fillMaxSize()
-            .verticalScroll(
-                state = rememberScrollState(),
-                enabled = true,
-                flingBehavior = null,
-                reverseScrolling = false
-            )
-            .requiredHeight(1100.dp),
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 30.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 20.dp),
             horizontalArrangement = Arrangement.Center
-        ){
-            Row(
-                modifier = Modifier
-                    .weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
+        ) {
+            (1..3).forEach { step ->
+                val canGo = when (step) {
+                    1 -> true
+                    2 -> isStep1Valid
+                    3 -> isStep1Valid && isStep2Valid
+                    else -> false
+                }
                 Text(
-                    text = "Emitida"
+                    text = "$step",
+                    fontWeight = if (currentStep == step) FontWeight.Bold else if (canGo) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (currentStep == step) Color.Black else if (canGo) ColorPrimario else Color.Gray,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 15.dp)
+                        .clickable(enabled = canGo && currentStep != step) { currentStep = step }
                 )
-                Checkbox(
-                    checked = emitida,
-                    onCheckedChange = {
-                        emitida = it
-                        recibida = !it
-                    },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = ColorPrimario
+                if (step != 3) {
+                    Text(
+                        text = "—",
+                        color = Color.Gray,
+                        fontSize = 20.sp
                     )
-                )
+                }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Text(
-                    text = "Recibida"
-                )
-                Checkbox(
-                    checked = recibida,
-                    onCheckedChange = {
-                        emitida = !it
-                        recibida = it
-                    },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = ColorPrimario
-                    )
-                )
-            }
-
         }
-
         Text(
             text = "Numero de factura: $numFactura",
             fontWeight = FontWeight.Bold,
@@ -206,172 +175,262 @@ fun ContentAddView(
                 .padding(horizontal = 30.dp)
         )
 
-        // Campos para Emisor
-        Text(
-            text = "Datos del Emisor",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-        )
-
-        OutlinedTextField(
-            value = nifEmisor,
-            onValueChange = { nifEmisor = it },
-            label = { Text(text = "NIF del emisor") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
-        )
-
-        OutlinedTextField(
-            value = empresaEmisor,
-            onValueChange = { empresaEmisor = it },
-            label = { Text(text = "Empresa emisora") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
-        )
-
-        OutlinedTextField(
-            value = direccionEmisor,
-            onValueChange = { direccionEmisor = it },
-            label = { Text(text = "Dirección del emisor") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
-        )
-
-        // Campos para Receptor
-        Text(
-            text = "Datos del Receptor",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-        )
-
-        OutlinedTextField(
-            value = clienteReceptor,
-            onValueChange = { clienteReceptor = it },
-            label = { Text(text = "Cliente receptor") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
-        )
-
-        OutlinedTextField(
-            value = cifReceptor,
-            onValueChange = { cifReceptor = it },
-            label = { Text(text = "CIF del receptor") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
-        )
-
-        OutlinedTextField(
-            value = direccionReceptor,
-            onValueChange = { direccionReceptor = it },
-            label = { Text(text = "Dirección del receptor") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next)
-        )
-
-        // PORCENTAJE DE IVA
-
-        Text(
-            text = "Porcentaje de IVA",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-        )
-
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 30.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            ivaOptions.forEach { option ->
+        when (currentStep) {
+            1 -> {
+                Text(
+                    text = "Datos generales",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                )
+                // Emitida/Recibida
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 30.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(text = "Emitida")
+                        Checkbox(
+                            checked = emitida,
+                            onCheckedChange = {
+                                emitida = it
+                                recibida = !it
+                            },
+                            colors = CheckboxDefaults.colors(checkedColor = ColorPrimario)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Text(text = "Recibida")
+                        Checkbox(
+                            checked = recibida,
+                            onCheckedChange = {
+                                emitida = !it
+                                recibida = it
+                            },
+                            colors = CheckboxDefaults.colors(checkedColor = ColorPrimario)
+                        )
+                    }
+                }
+                // Base imponible
+                OutlinedTextField(
+                    value = baseImponible,
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() }) baseImponible = it
+                    },
+                    label = { Text("Base imponible") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
+                )
+                // Porcentaje de IVA
+                Text(
+                    text = "Porcentaje de IVA",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 30.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    ivaOptions.forEach { option ->
+                        Button(
+                            onClick = { porcentajeiva = option.first },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (porcentajeiva == option.first) ColorPrimario else ColorSecundario,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(2.dp)
+                        ) {
+                            Text(text = "${option.first}%")
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.size(16.dp))
                 Button(
-                    onClick = { porcentajeiva = option.first },
+                    onClick = { currentStep = 2 },
+                    enabled = isStep1Valid,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (porcentajeiva == option.first) ColorPrimario else ColorSecundario,
+                        containerColor = ColorSecundario,
                         contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
-                        .weight(1f)
                         .padding(2.dp)
                 ) {
-                    Text(text = "${option.first}%")
+                    Text("Siguiente")
+                }
+            }
+            2 -> {
+                Text(
+                    text = "Datos del emisor",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                )
+                OutlinedTextField(
+                    value = nifEmisor,
+                    onValueChange = { nifEmisor = it },
+                    label = { Text("NIF del emisor") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+                OutlinedTextField(
+                    value = empresaEmisor,
+                    onValueChange = { empresaEmisor = it },
+                    label = { Text("Empresa emisora") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+                OutlinedTextField(
+                    value = direccionEmisor,
+                    onValueChange = { direccionEmisor = it },
+                    label = { Text("Dirección del emisor") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = { currentStep = 1 },
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .padding(2.dp)
+                    ) {
+                        Text("Anterior")
+                    }
+                    Button(
+                        onClick = { currentStep = 3 },
+                        enabled = isStep2Valid,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ColorSecundario,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .padding(2.dp)
+                    ) {
+                        Text("Siguiente")
+                    }
+                }
+            }
+            3 -> {
+                Text(
+                    text = "Datos del receptor",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                )
+                OutlinedTextField(
+                    value = cifReceptor,
+                    onValueChange = { cifReceptor = it },
+                    label = { Text("CIF del receptor") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+                OutlinedTextField(
+                    value = clienteReceptor,
+                    onValueChange = { clienteReceptor = it },
+                    label = { Text("Cliente receptor") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+                OutlinedTextField(
+                    value = direccionReceptor,
+                    onValueChange = { direccionReceptor = it },
+                    label = { Text("Dirección del receptor") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = { currentStep = 2 },
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .padding(2.dp)
+                    ) {
+                        Text("Anterior")
+                    }
+                    Button(
+                        onClick = {
+                            crearFactura(
+                                navController = navController,
+                                facturaViewModel = facturaViewModel,
+                                emisorViewModel = emisorViewModel,
+                                receptorViewModel = receptorViewModel,
+                                direccionEmisor = direccionEmisor,
+                                empresaEmisor = empresaEmisor,
+                                nifEmisor = nifEmisor,
+                                direccionReceptor = direccionReceptor,
+                                clienteReceptor = clienteReceptor,
+                                cifReceptor = cifReceptor,
+                                numFactura = numFactura,
+                                baseImponible = baseImponible,
+                                emitida = emitida,
+                                porcentajeiva = porcentajeiva
+                            )
+                        },
+                        enabled = isStep3Valid,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ColorSecundario,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .padding(2.dp)
+                    ) {
+                        Text("Agregar Factura")
+                    }
                 }
             }
         }
-
-        OutlinedTextField(
-            value = baseImponible,
-            onValueChange = {
-                if (it.all { char -> char.isDigit() }) {
-                    baseImponible = it
-                }
-            },
-            label = { Text(text = "Base imponible") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-        )
-
-        Button(
-            onClick = {
-                crearFactura(
-                    navController = navController,
-                    facturaViewModel = facturaViewModel,
-                    emisorViewModel = emisorViewModel,
-                    receptorViewModel = receptorViewModel,
-                    direccionEmisor = direccionEmisor,
-                    empresaEmisor = empresaEmisor,
-                    nifEmisor = nifEmisor,
-                    direccionReceptor = direccionReceptor,
-                    clienteReceptor = clienteReceptor,
-                    cifReceptor = cifReceptor,
-                    numFactura = numFactura,
-                    baseImponible = baseImponible,
-                    emitida = emitida,
-                    porcentajeiva = porcentajeiva
-                )
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ColorSecundario,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .padding(2.dp)
-
-        ) {
-            Text(text = "Agregar Factura", fontSize = 16.sp)
-        }
-
-        //Spacer(modifier = Modifier.size(150.dp))
     }
 }
 
